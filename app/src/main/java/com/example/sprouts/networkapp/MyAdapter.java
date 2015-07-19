@@ -40,7 +40,7 @@ public class MyAdapter extends ArrayAdapter<String> {
 
         titleView.setText(values.get(position * 2));
         contentView.setText(values.get(position * 2 + 1));
-        imageView.setImageResource(android.R.drawable.gallery_thumb);
+        imageView.setImageResource(R.drawable.blackbin4);
 
 
         return item;
