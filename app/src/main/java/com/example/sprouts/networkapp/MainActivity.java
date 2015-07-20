@@ -3,11 +3,13 @@ package com.example.sprouts.networkapp;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.DataSetObserver;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.preference.PreferenceActivity;
+import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -62,6 +64,15 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         postText = (EditText) findViewById(R.id.postText);
 
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        String postCode = prefs.getString("postcode", "");
+        postText.setText(postCode);
     }
 
 
@@ -188,13 +199,14 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            launchSettings();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-    public void launchSettings(View view) {
+    public void launchSettings() {
 
         Intent intent = new Intent(this, SettingsActivity.class);
         startActivity(intent);
