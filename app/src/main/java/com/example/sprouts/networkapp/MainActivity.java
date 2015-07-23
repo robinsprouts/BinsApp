@@ -14,10 +14,12 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -50,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String DEBUG_TAG = "HttpExample";
     private EditText postText;
     private ListView listView;
+    private Button button;
 
     String[][] bins = new String[2][2];
 
@@ -70,13 +73,50 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
+
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+        final SharedPreferences.Editor edit = prefs.edit();
+
+
         String postCode = prefs.getString("postcode", "");
         postText.setText(postCode);
+
+        bins[0][0] = prefs.getString("bins00", "null");
+        bins[0][1] = prefs.getString("bins01", "null");
+        bins[1][0] = prefs.getString("bins10", "null");
+        bins[1][1] = prefs.getString("bins11", "null");
+
+
+
+        /* try putStringSet and getStringSet - see bookmarked page*/
+
+        postText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+
+                    edit.putString("postcode", postText.getText().toString());
+                    edit.commit();
+
+                    check();
+                }
+                return false;
+            }
+        });
+
+        button = (Button) findViewById(R.id.button);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                edit.clear();
+                edit.commit();
+            }
+        });
     }
 
 
-    public void click(View view) {
+    public void check() {
                 String stringUrl = "https://wasteonlinecalendar.cardiff.gov.uk/";
                 ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
                 NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
@@ -110,8 +150,8 @@ public class MainActivity extends AppCompatActivity {
 
             bins = result;
 
-            ArrayList arrayList = new ArrayList<String>(Arrays.asList(bins[0]));
-            ArrayList arrayList2 = new ArrayList<String>(Arrays.asList(bins[1]));
+            ArrayList arrayList = new ArrayList(Arrays.asList(bins[0]));
+            ArrayList arrayList2 = new ArrayList(Arrays.asList(bins[1]));
 
             arrayList.addAll(arrayList2);
 
@@ -173,6 +213,7 @@ public class MainActivity extends AppCompatActivity {
             return bins;
         }
     }
+
 
 
     public String readIt(InputStream stream, int len) throws IOException {
