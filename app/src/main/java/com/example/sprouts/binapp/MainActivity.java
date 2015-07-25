@@ -1,4 +1,4 @@
-package com.example.sprouts.networkapp;
+package com.example.sprouts.binapp;
 
 import android.app.NotificationManager;
 import android.content.Context;
@@ -56,6 +56,8 @@ public class MainActivity extends AppCompatActivity {
 
     String[][] bins = new String[2][2];
 
+    ArrayList binArray = new ArrayList();
+
     ArrayAdapter<String> arrayAdapter;
 
     NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this).setSmallIcon(R.drawable.notification_template_icon_bg).setContentTitle("HELLO").setContentText("HELLOOO");
@@ -79,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
         final SharedPreferences.Editor edit = prefs.edit();
 
 
-        String postCode = prefs.getString("postcode", "");
+        String postCode = prefs.getString("postcode", "DEFAULT");
         postText.setText(postCode);
 
         bins[0][0] = prefs.getString("bins00", "null");
@@ -168,6 +170,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void setBins() {
+
+
+    }
+
+
     public void notification() {
         int mNotificationId = 001;
 
@@ -179,6 +187,10 @@ public class MainActivity extends AppCompatActivity {
 
         String bin;
         String[][] bins = new String[2][2];
+
+        ArrayList binArray = new ArrayList();
+
+
 
         String postcode = postText.getText().toString();
 
@@ -198,12 +210,15 @@ public class MainActivity extends AppCompatActivity {
                 bins[n][0] = dayOne.findFirst("<strong>").getText();
                 bins[n][1] = "";
 
+                binArray.add(bins[n][0]);
+
 
                 Elements lis = dayOne.findEach("<li>");
                 for (Element li : lis) {
                     bin = li.getText();
                     bins[n][1] += bin +"\n";
                 }
+                binArray.add(bins[n][1]);
             }
 
         } catch (JauntException e) {

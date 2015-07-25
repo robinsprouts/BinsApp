@@ -1,4 +1,4 @@
-package com.example.sprouts.networkapp;
+package com.example.sprouts.binapp;
 
 import android.content.Context;
 import android.view.LayoutInflater;
