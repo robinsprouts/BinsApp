@@ -27,7 +27,7 @@ public class MyAdapter extends ArrayAdapter<String> {
     @Override
 
     public int getCount(){
-        return 2;
+        return 4;
     }
 
     @Override
@@ -38,9 +38,18 @@ public class MyAdapter extends ArrayAdapter<String> {
         TextView contentView = (TextView) item.findViewById(R.id.content);
         ImageView imageView = (ImageView) item.findViewById(R.id.image);
 
-        titleView.setText(values.get(position * 2));
-        contentView.setText(values.get(position * 2 + 1));
-        imageView.setImageResource(R.drawable.ic_blackbin1);
+        String title = values.get(position * 2);
+        String binText = values.get(position *2 +1);
+        int binTextLength = binText.length();
+
+        titleView.setText(title);
+        contentView.setText(binText);
+
+        if (binTextLength == 37) {
+            imageView.setImageResource(R.drawable.ic_blackbin1);
+        } else {
+            imageView.setImageResource(R.drawable.ic_greenbin1);
+        }
 
 
         return item;

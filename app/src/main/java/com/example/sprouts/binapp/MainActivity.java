@@ -61,6 +61,8 @@ public class MainActivity extends AppCompatActivity {
 
     ArrayAdapter<String> arrayAdapter;
 
+    ArrayAdapter<String> spinAdapter;
+
     NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this).setSmallIcon(R.drawable.notification_template_icon_bg).setContentTitle("HELLO").setContentText("HELLOOO");
 
 
@@ -69,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         postText = (EditText) findViewById(R.id.postText);
-        textView = (TextView) findViewById(R.id.textView);
+
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
     }
@@ -137,8 +139,19 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
+    public void spin() {
 
-    /* try to fix by making DownloadWebpageTask2 and avoiding  ArrayList  ; also work out how to branch on git */
+        String stringUrl = "https://wastemanagementcalendar.cardiff.gov.uk/English.aspx";
+        ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        if (networkInfo != null && networkInfo.isConnected()) {
+            new GetAddressTask().execute(stringUrl);
+            Toast.makeText(getApplicationContext(), "Updating", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(getApplicationContext(), "Connecting", Toast.LENGTH_SHORT).show();
+        }
+
+    }
 
     private class DownloadWebpageTask extends AsyncTask<String, Void, ArrayList> {
 
@@ -147,7 +160,35 @@ public class MainActivity extends AppCompatActivity {
         protected ArrayList doInBackground(String... urls) {
 
 
-            ArrayList<String > a = new ArrayList();
+            ArrayList<String> a = new ArrayList();
+
+            try {
+                return jaunty(urls[0]);
+            } catch (IOException e) {
+                Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                return a;
+            }
+        }
+
+
+        @Override
+        protected void onPostExecute(ArrayList arrayList) {
+
+
+            ListView listView = (ListView) findViewById(R.id.listView);
+            arrayAdapter = new MyAdapter(MainActivity.this, arrayList);
+            listView.setAdapter(arrayAdapter);
+
+        }
+    }
+
+    private class GetAddressTask extends AsyncTask<String, Void, ArrayList> {
+
+        @Override
+
+        protected ArrayList doInBackground(String... urls) {
+
+            ArrayList<String> a = new ArrayList();
 
             try {
                 return jaunty2(urls[0]);
@@ -155,25 +196,10 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
                 return a;
             }
-        }
 
-        @Override
-        protected void onPostExecute(ArrayList arrayList) {
-
-/*
-            textView.setText(arrayList.get(0).toString());
-            */
-
-            /*
-
-
-            ListView listView = (ListView) findViewById(R.id.listView);
-            arrayAdapter = new MyAdapter(MainActivity.this, arrayList);
-            listView.setAdapter(arrayAdapter);
-
-            */
         }
     }
+
 
 
     public void notification() {
@@ -183,13 +209,12 @@ public class MainActivity extends AppCompatActivity {
         mNot.notify(mNotificationId, mBuilder.build());
     }
 
-    private ArrayList jaunty2(String myurl) throws IOException {
+    private ArrayList jaunty(String myurl) throws IOException {
 
 
         String[] bins = new String[2];
 
         ArrayList binArray = new ArrayList();
-
 
         try {
             UserAgent userAgent = new UserAgent();
@@ -198,144 +223,68 @@ public class MainActivity extends AppCompatActivity {
             userAgent.doc.apply("47 / CF244QR");
             userAgent.doc.submit("Search");
 
-            Elements trs = userAgent.doc.findEach("<table>").findEach("<tr>");
 
-            Element tr = userAgent.doc.findFirst("<table>").findFirst("<tr>");
+            Elements trs = userAgent.doc.findFirst("<table class = border>").findEvery("<tr>");
 
-            Elements tds = tr.findEach("<td>");
-
-
-            for (Element td : tds) {
-                bins[0] += td.getText();
-            }
-
-            Element td = userAgent.doc.findFirst("<td>");
-
-            bins[0] = td.getText();
-
-            textView.setText(bins[0]);
-
-            /*
             int row = 0;
 
             for (Element tr : trs) {
-                if (row == 0) {
-                    continue;
-                } else {
 
-                    Elements tds = tr.findEach("<td>");
+                    Elements tds = tr.findEach("<td class = border>");
 
                     int col = 0;
+                    bins[1] = row + " ";
 
                     for (Element td : tds) {
 
-                        bins[1] = "";
+                        String binText = td.findFirst("<center>").innerText(" ", false, false);
 
-                        if (col == 0) {
-                            bins[0] = td.getText();
+
+                        if (row == 0) {
+                            continue;
                         } else {
-                            bins[1] += td.getText() + "\n";
+
+                            switch (col)
+                            {
+                                case 0:
+                                    bins[0] = row + " " + binText;
+                                    break;
+
+                                case 1:
+                                case 2:
+                                    bins[1] += binText + "\n";
+                                    break;
+
+                                case 3:
+                                    bins[1] += binText;
+                                    break;
+                            }
+
+                            col += 1;
                         }
-
-                        col += 1;
-
                     }
-
-                }
                 row += 1;
-
+                binArray.add(bins[0]);
+                binArray.add(bins[1]);
             }
-
-
-            binArray.add(bins[0]); */
 
             return binArray;
 
         } catch (JauntException e) {
-            Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
-            binArray.add(e.getMessage().toString());
+            System.err.println(e);
             return binArray;
         }
 
 
     }
 
+    private ArrayList jaunty2(String myurl) throws IOException {
 
-    private ArrayList jaunty(String myurl) throws IOException {
+        ArrayList<String> addressList = new ArrayList();
 
-        String[] bins = new String[2];
+        return addressList;
 
-        ArrayList<String> binArray = new ArrayList();
-
-
-        /*this is the bit that reads the webform */
-
-        String postcode = postText.getText().toString();
-
-        try {
-
-            UserAgent userAgent = new UserAgent();
-
-            userAgent.visit(myurl);
-
-
-            userAgent.doc.apply("167 / " + postcode);
-            userAgent.doc.submit("Search");
-
-            String text = userAgent.doc.innerHTML();
-
-            textView.setText("HELLO");
-
-
-/*
-
-            Elements trs = userAgent.doc.findEach("<tr>");
-
-
-            int row = 0;
-
-            for (Element tr : trs) {
-                if (row == 0) {
-                    continue;
-                } else {
-
-                    Elements tds = tr.findEach("<td>");
-
-                    int col = 0;
-
-                    for (Element td : tds) {
-
-                        bins[1] = "";
-
-                        if (col == 0) {
-                            bins[0] = td.getText();
-                        } else {
-
-                            bins[1] += td.getText() + "\n";
-                        }
-
-                        col += 1;
-
-                    }
-
-                }
-                row += 1;
-
-
-            }
-
-            */
-            binArray.add(bins[0]);
-            binArray.add(bins[1]);
-
-            return binArray;
-
-        } catch (JauntException e) {
-            Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
-            return binArray;
-        }
     }
-
 
 
     public String readIt(InputStream stream, int len) throws IOException {

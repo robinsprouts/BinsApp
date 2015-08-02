@@ -16,7 +16,8 @@
             android:id="@+id/image"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/abc_btn_radio_to_on_mtrl_000" />
+            android:src="@drawable/abc_btn_radio_to_on_mtrl_000"
+            android:layout_gravity="center_vertical" />
 
         <LinearLayout
             android:orientation="vertical"
