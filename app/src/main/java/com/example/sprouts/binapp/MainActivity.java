@@ -45,6 +45,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Set;
 import java.util.prefs.Preferences;
 
 public class MainActivity extends AppCompatActivity {
@@ -53,8 +54,8 @@ public class MainActivity extends AppCompatActivity {
     private EditText postText;
     private ListView listView;
     private Button button;
+    private TextView textView;
 
-    String[][] bins = new String[2][2];
 
     ArrayList binArray = new ArrayList();
 
@@ -68,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         postText = (EditText) findViewById(R.id.postText);
+        textView = (TextView) findViewById(R.id.textView);
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
     }
@@ -80,17 +82,20 @@ public class MainActivity extends AppCompatActivity {
 
         final SharedPreferences.Editor edit = prefs.edit();
 
-
+/*
         String postCode = prefs.getString("postcode", "DEFAULT");
         postText.setText(postCode);
 
-        bins[0][0] = prefs.getString("bins00", "null");
-        bins[0][1] = prefs.getString("bins01", "null");
-        bins[1][0] = prefs.getString("bins10", "null");
-        bins[1][1] = prefs.getString("bins11", "null");
+*/
+
+        /* work out what is going on here
 
 
+        Set<String> set= prefs.getStringSet("bins", null);
 
+        ArrayList binArray = new ArrayList(set);
+
+*/
         /* try putStringSet and getStringSet - see bookmarked page*/
 
         postText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -119,28 +124,33 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void check() {
-                String stringUrl = "https://wasteonlinecalendar.cardiff.gov.uk/";
+
+
+                String stringUrl = "https://wastemanagementcalendar.cardiff.gov.uk/English.aspx";
                 ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
                 NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
                 if (networkInfo != null && networkInfo.isConnected()) {
                     new DownloadWebpageTask().execute(stringUrl);
-                  /*  Toast.makeText(getApplicationContext(), "Updating", Toast.LENGTH_SHORT).show();
-*/
+                  Toast.makeText(getApplicationContext(), "Updating", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(getApplicationContext(), "Connecting", Toast.LENGTH_SHORT).show();
                 }
             }
 
 
+    /* try to fix by making DownloadWebpageTask2 and avoiding  ArrayList  ; also work out how to branch on git */
 
-    private class DownloadWebpageTask extends AsyncTask<String, Void, String[][]> {
+    private class DownloadWebpageTask extends AsyncTask<String, Void, ArrayList> {
 
         @Override
-        protected String[][] doInBackground(String... urls) {
 
-            String[][] a = new String[2][2];
+        protected ArrayList doInBackground(String... urls) {
+
+
+            ArrayList<String > a = new ArrayList();
+
             try {
-                return jaunty(urls[0]);
+                return jaunty2(urls[0]);
             } catch (IOException e) {
                 Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
                 return a;
@@ -148,31 +158,21 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        protected void onPostExecute(String[][] result) {
+        protected void onPostExecute(ArrayList arrayList) {
 
-            bins = result;
+/*
+            textView.setText(arrayList.get(0).toString());
+            */
 
-            ArrayList arrayList = new ArrayList(Arrays.asList(bins[0]));
-            ArrayList arrayList2 = new ArrayList(Arrays.asList(bins[1]));
+            /*
 
-            arrayList.addAll(arrayList2);
 
             ListView listView = (ListView) findViewById(R.id.listView);
             arrayAdapter = new MyAdapter(MainActivity.this, arrayList);
-
             listView.setAdapter(arrayAdapter);
 
-
-
-             /* notification(); */
-
-
+            */
         }
-    }
-
-    public void setBins() {
-
-
     }
 
 
@@ -183,14 +183,92 @@ public class MainActivity extends AppCompatActivity {
         mNot.notify(mNotificationId, mBuilder.build());
     }
 
-    private String[][] jaunty(String myurl) throws IOException {
+    private ArrayList jaunty2(String myurl) throws IOException {
 
-        String bin;
-        String[][] bins = new String[2][2];
+
+        String[] bins = new String[2];
 
         ArrayList binArray = new ArrayList();
 
 
+        try {
+            UserAgent userAgent = new UserAgent();
+            userAgent.visit(myurl);
+
+            userAgent.doc.apply("47 / CF244QR");
+            userAgent.doc.submit("Search");
+
+            Elements trs = userAgent.doc.findEach("<table>").findEach("<tr>");
+
+            Element tr = userAgent.doc.findFirst("<table>").findFirst("<tr>");
+
+            Elements tds = tr.findEach("<td>");
+
+
+            for (Element td : tds) {
+                bins[0] += td.getText();
+            }
+
+            Element td = userAgent.doc.findFirst("<td>");
+
+            bins[0] = td.getText();
+
+            textView.setText(bins[0]);
+
+            /*
+            int row = 0;
+
+            for (Element tr : trs) {
+                if (row == 0) {
+                    continue;
+                } else {
+
+                    Elements tds = tr.findEach("<td>");
+
+                    int col = 0;
+
+                    for (Element td : tds) {
+
+                        bins[1] = "";
+
+                        if (col == 0) {
+                            bins[0] = td.getText();
+                        } else {
+                            bins[1] += td.getText() + "\n";
+                        }
+
+                        col += 1;
+
+                    }
+
+                }
+                row += 1;
+
+            }
+
+
+            binArray.add(bins[0]); */
+
+            return binArray;
+
+        } catch (JauntException e) {
+            Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+            binArray.add(e.getMessage().toString());
+            return binArray;
+        }
+
+
+    }
+
+
+    private ArrayList jaunty(String myurl) throws IOException {
+
+        String[] bins = new String[2];
+
+        ArrayList<String> binArray = new ArrayList();
+
+
+        /*this is the bit that reads the webform */
 
         String postcode = postText.getText().toString();
 
@@ -199,33 +277,62 @@ public class MainActivity extends AppCompatActivity {
             UserAgent userAgent = new UserAgent();
 
             userAgent.visit(myurl);
-            userAgent.doc.apply(postcode);
-            userAgent.doc.submit("Go");
 
 
-            for (int n = 0; n<=1; n++) {
-                Element dayOne = userAgent.doc.findFirst("<span id=lblCol" + (n + 1) + ">");
+            userAgent.doc.apply("167 / " + postcode);
+            userAgent.doc.submit("Search");
+
+            String text = userAgent.doc.innerHTML();
+
+            textView.setText("HELLO");
 
 
-                bins[n][0] = dayOne.findFirst("<strong>").getText();
-                bins[n][1] = "";
+/*
 
-                binArray.add(bins[n][0]);
+            Elements trs = userAgent.doc.findEach("<tr>");
 
 
-                Elements lis = dayOne.findEach("<li>");
-                for (Element li : lis) {
-                    bin = li.getText();
-                    bins[n][1] += bin +"\n";
+            int row = 0;
+
+            for (Element tr : trs) {
+                if (row == 0) {
+                    continue;
+                } else {
+
+                    Elements tds = tr.findEach("<td>");
+
+                    int col = 0;
+
+                    for (Element td : tds) {
+
+                        bins[1] = "";
+
+                        if (col == 0) {
+                            bins[0] = td.getText();
+                        } else {
+
+                            bins[1] += td.getText() + "\n";
+                        }
+
+                        col += 1;
+
+                    }
+
                 }
-                binArray.add(bins[n][1]);
+                row += 1;
+
+
             }
+
+            */
+            binArray.add(bins[0]);
+            binArray.add(bins[1]);
+
+            return binArray;
 
         } catch (JauntException e) {
             Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
-        } finally {
-            //* return webpage;
-            return bins;
+            return binArray;
         }
     }
 
