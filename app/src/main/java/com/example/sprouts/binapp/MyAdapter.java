@@ -45,7 +45,7 @@ public class MyAdapter extends ArrayAdapter<String> {
         titleView.setText(title);
         contentView.setText(binText);
 
-        if (binTextLength == 37) {
+        if (binTextLength == 34) {
             imageView.setImageResource(R.drawable.ic_blackbin1);
         } else {
             imageView.setImageResource(R.drawable.ic_greenbin1);

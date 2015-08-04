@@ -50,7 +50,7 @@ import java.util.prefs.Preferences;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String DEBUG_TAG = "HttpExample";
+    private static final String DEBUG_TAG = "Bins";
     private EditText postText;
     private ListView listView;
     private Button button;
@@ -60,8 +60,6 @@ public class MainActivity extends AppCompatActivity {
     ArrayList binArray = new ArrayList();
 
     ArrayAdapter<String> arrayAdapter;
-
-    ArrayAdapter<String> spinAdapter;
 
     NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this).setSmallIcon(R.drawable.notification_template_icon_bg).setContentTitle("HELLO").setContentText("HELLOOO");
 
@@ -139,20 +137,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
-    public void spin() {
-
-        String stringUrl = "https://wastemanagementcalendar.cardiff.gov.uk/English.aspx";
-        ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-        if (networkInfo != null && networkInfo.isConnected()) {
-            new GetAddressTask().execute(stringUrl);
-            Toast.makeText(getApplicationContext(), "Updating", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(getApplicationContext(), "Connecting", Toast.LENGTH_SHORT).show();
-        }
-
-    }
-
     private class DownloadWebpageTask extends AsyncTask<String, Void, ArrayList> {
 
         @Override
@@ -181,25 +165,6 @@ public class MainActivity extends AppCompatActivity {
 
         }
     }
-
-    private class GetAddressTask extends AsyncTask<String, Void, ArrayList> {
-
-        @Override
-
-        protected ArrayList doInBackground(String... urls) {
-
-            ArrayList<String> a = new ArrayList();
-
-            try {
-                return jaunty2(urls[0]);
-            } catch (IOException e) {
-                Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
-                return a;
-            }
-
-        }
-    }
-
 
 
     public void notification() {
@@ -233,7 +198,7 @@ public class MainActivity extends AppCompatActivity {
                     Elements tds = tr.findEach("<td class = border>");
 
                     int col = 0;
-                    bins[1] = row + " ";
+                    bins[1] = "";
 
                     for (Element td : tds) {
 
@@ -247,7 +212,7 @@ public class MainActivity extends AppCompatActivity {
                             switch (col)
                             {
                                 case 0:
-                                    bins[0] = row + " " + binText;
+                                    bins[0] = binText;
                                     break;
 
                                 case 1:
@@ -268,6 +233,9 @@ public class MainActivity extends AppCompatActivity {
                 binArray.add(bins[1]);
             }
 
+            binArray.remove(0);
+            binArray.remove(0);
+
             return binArray;
 
         } catch (JauntException e) {
@@ -278,22 +246,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private ArrayList jaunty2(String myurl) throws IOException {
-
-        ArrayList<String> addressList = new ArrayList();
-
-        return addressList;
-
-    }
-
-
-    public String readIt(InputStream stream, int len) throws IOException {
-        Reader reader = null;
-        reader = new InputStreamReader(stream, "UTF-8");
-        char[] buffer = new char[len];
-        reader.read(buffer);
-        return new String(buffer);
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -315,6 +267,11 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
 
+        if (id == R.id.action_input) {
+            launchInput();
+            return true;
+        }
+
         return super.onOptionsItemSelected(item);
     }
 
@@ -323,6 +280,12 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, SettingsActivity.class);
         startActivity(intent);
 
+    }
+
+    public void launchInput() {
+
+        Intent intent = new Intent(this, AddressActivity.class);
+        startActivity(intent);
     }
 
 }
