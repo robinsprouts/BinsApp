@@ -11,20 +11,18 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true">
+        android:layout_alignParentStart="true"
+        android:id="@+id/layout">
 
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="number"
+            android:inputType="textPostalAddress"
             android:ems="10"
-            android:id="@+id/houseNumber"
-            android:contentDescription="house number" />
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/postCode" />
+            android:id="@+id/address"
+            android:contentDescription="address"
+            android:autoText="false"
+            android:text="167 CF244RX" />
 
         <Button
             style="?android:attr/buttonStyleSmall"
@@ -39,5 +37,6 @@
             android:layout_height="wrap_content"
             android:id="@+id/spinner"
             android:layout_gravity="center_horizontal" />
+
     </LinearLayout>
 </RelativeLayout>

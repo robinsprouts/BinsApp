@@ -51,11 +51,8 @@ import java.util.prefs.Preferences;
 public class MainActivity extends AppCompatActivity {
 
     private static final String DEBUG_TAG = "Bins";
-    private EditText postText;
+    private TextView postText;
     private ListView listView;
-    private Button button;
-    private TextView textView;
-
 
     ArrayList binArray = new ArrayList();
 
@@ -68,8 +65,7 @@ public class MainActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        postText = (EditText) findViewById(R.id.postText);
-
+        postText = (TextView) findViewById(R.id.textView);
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
     }
@@ -80,46 +76,21 @@ public class MainActivity extends AppCompatActivity {
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-        final SharedPreferences.Editor edit = prefs.edit();
-
-/*
-        String postCode = prefs.getString("postcode", "DEFAULT");
-        postText.setText(postCode);
-
-*/
-
-        /* work out what is going on here
+        String address = prefs.getString("address", "DEFAULT");
 
 
-        Set<String> set= prefs.getStringSet("bins", null);
+        if (address != "DEFAULT") {
+            postText.setText(address);
+            check();
+        }
+
+
+        /* Set<String> set= prefs.getStringSet("bins", null);
 
         ArrayList binArray = new ArrayList(set);
 
-*/
-        /* try putStringSet and getStringSet - see bookmarked page*/
+    */
 
-        postText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_DONE) {
-
-                    edit.putString("postcode", postText.getText().toString());
-                    edit.commit();
-
-                    check();
-                }
-                return false;
-            }
-        });
-
-        button = (Button) findViewById(R.id.button);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                edit.clear();
-                edit.commit();
-            }
-        });
     }
 
 
@@ -185,7 +156,7 @@ public class MainActivity extends AppCompatActivity {
             UserAgent userAgent = new UserAgent();
             userAgent.visit(myurl);
 
-            userAgent.doc.apply("47 / CF244QR");
+            userAgent.doc.apply(postText.getText());
             userAgent.doc.submit("Search");
 
 
