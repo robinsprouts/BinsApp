@@ -10,9 +10,12 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -45,16 +48,23 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.prefs.Preferences;
+
+/* TO DO: I need to update the binList each time the address is refreshed (in AddressActivity) *and* in the MainActivity when the app first opens, and at regular intervals using an alarm
+
+I also need to convert the dates into proper dates so that I can make the alarm work... Don't use alarm use jobScheduler instead
+
+ */
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String DEBUG_TAG = "Bins";
     private TextView postText;
-    private ListView listView;
 
-    ArrayList binArray = new ArrayList();
 
     ArrayAdapter<String> arrayAdapter;
 
@@ -68,6 +78,9 @@ public class MainActivity extends AppCompatActivity {
         postText = (TextView) findViewById(R.id.textView);
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+
+
+
     }
 
     @Override
@@ -76,35 +89,44 @@ public class MainActivity extends AppCompatActivity {
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-        String address = prefs.getString("address", "DEFAULT");
+        String binString = prefs.getString("bins", "DEFAULT");
 
+        if (binString == "DEFAULT") {
+            launchInput();
+        } else {
 
-        if (address != "DEFAULT") {
-            postText.setText(address);
-            check();
+            String[] bins = TextUtils.split(binString, ";");
+
+            ArrayList<String> binList = new ArrayList(Arrays.asList(bins));
+
+            ListView listView = (ListView) findViewById(R.id.listView);
+            arrayAdapter = new MyAdapter(MainActivity.this, binList);
+            listView.setAdapter(arrayAdapter);
+
         }
 
+        String address = prefs.getString("address", "DEFAULT");
 
-        /* Set<String> set= prefs.getStringSet("bins", null);
+        if (address != "DEFAULT") {
 
-        ArrayList binArray = new ArrayList(set);
-
-    */
+            String shortAddress = address.substring(0, address.indexOf(","));
+            postText.setText(shortAddress);
+            check();
+        }
 
     }
 
 
     public void check() {
 
+        View coordinatorView = findViewById(R.id.coordinatorView);
 
                 String stringUrl = "https://wastemanagementcalendar.cardiff.gov.uk/English.aspx";
                 ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
                 NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
                 if (networkInfo != null && networkInfo.isConnected()) {
                     new DownloadWebpageTask().execute(stringUrl);
-                  Toast.makeText(getApplicationContext(), "Updating", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(getApplicationContext(), "Connecting", Toast.LENGTH_SHORT).show();
+                    Snackbar.make(coordinatorView, "Updating", Snackbar.LENGTH_SHORT).show();
                 }
             }
 
@@ -130,9 +152,13 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(ArrayList arrayList) {
 
 
-            ListView listView = (ListView) findViewById(R.id.listView);
-            arrayAdapter = new MyAdapter(MainActivity.this, arrayList);
-            listView.setAdapter(arrayAdapter);
+            String joined = TextUtils.join(";", arrayList);
+
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+
+            final SharedPreferences.Editor edit = prefs.edit();
+            edit.putString("bins", joined);
+            edit.commit();
 
         }
     }

@@ -8,6 +8,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -37,7 +38,6 @@ public class AddressActivity extends AppCompatActivity implements AdapterView.On
     private EditText address;
     private Button ok;
     private Spinner spinner;
-
     private String selectText;
 
 
@@ -66,14 +66,16 @@ public class AddressActivity extends AppCompatActivity implements AdapterView.On
 
     public void spin() {
 
+        View coordinatorView = findViewById(R.id.coordinatorView);
+
         String stringUrl = "https://wastemanagementcalendar.cardiff.gov.uk/English.aspx";
         ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
         if (networkInfo != null && networkInfo.isConnected()) {
             new GetAddressTask().execute(stringUrl);
-            Toast.makeText(getApplicationContext(), "Updating", Toast.LENGTH_SHORT).show();
+            Snackbar.make(coordinatorView, "Updating", Snackbar.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(getApplicationContext(), "Connecting", Toast.LENGTH_SHORT).show();
+            Snackbar.make(coordinatorView, "Connecting", Snackbar.LENGTH_SHORT).show();
         }
 
     }
