@@ -6,14 +6,4 @@
         android:summary="@string/pref_sync_summ"
         android:defaultValue="true" />
 
-    <EditTextPreference
-        android:key="postcode"
-        android:title="@string/postcode_text"
-        android:summary="@string/postcode_summ"
-        android:defaultValue="@string/postcode_default"
-        />
-
-
-
-
 </PreferenceScreen>

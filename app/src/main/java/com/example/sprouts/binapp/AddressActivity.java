@@ -9,6 +9,7 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -33,7 +34,7 @@ import com.jaunt.UserAgent;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class AddressActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
+public class AddressActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener  {
 
     private EditText address;
     private Button ok;
@@ -66,16 +67,16 @@ public class AddressActivity extends AppCompatActivity implements AdapterView.On
 
     public void spin() {
 
-        View coordinatorView = findViewById(R.id.coordinatorView);
+        View layoutView = findViewById(R.id.addressLayout);
 
         String stringUrl = "https://wastemanagementcalendar.cardiff.gov.uk/English.aspx";
         ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
         if (networkInfo != null && networkInfo.isConnected()) {
             new GetAddressTask().execute(stringUrl);
-            Snackbar.make(coordinatorView, "Updating", Snackbar.LENGTH_SHORT).show();
+            Snackbar.make(layoutView, "Updating", Snackbar.LENGTH_SHORT).show();
         } else {
-            Snackbar.make(coordinatorView, "Connecting", Snackbar.LENGTH_SHORT).show();
+            Snackbar.make(layoutView, "Connecting", Snackbar.LENGTH_SHORT).show();
         }
 
     }
@@ -170,8 +171,6 @@ public class AddressActivity extends AppCompatActivity implements AdapterView.On
         return addressList;
 
     }
-
-
 
 
 

@@ -1,6 +1,7 @@
 package com.example.sprouts.binapp;
 
 import android.app.NotificationManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -64,6 +65,8 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String DEBUG_TAG = "Bins";
     private TextView postText;
+    private String fullAddress;
+    private Date firstDate;
 
 
     ArrayAdapter<String> arrayAdapter;
@@ -79,7 +82,16 @@ public class MainActivity extends AppCompatActivity {
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
+        /*
+        mJobScheduler = (JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE);
 
+        JobInfo.Builder builder = new JobInfo.Builder(1, new ComponentName(getPackageName(), BackgroundService.class.getName()));
+
+        builder.setPeriodic(60000);
+        if( mJobScheduler.schedule( builder.build() ) <= 0 ) {
+//If something goes wrong
+        }
+        */
 
     }
 
@@ -89,11 +101,27 @@ public class MainActivity extends AppCompatActivity {
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
+        String address = prefs.getString("address", "DEFAULT");
+
+        fullAddress = address;
+
+        if (address != "DEFAULT") {
+
+            String shortAddress = shortenAddress(address);
+
+            postText.setText(shortAddress);
+
+            check();
+        } else {
+            launchInput();
+        }
+
         String binString = prefs.getString("bins", "DEFAULT");
 
         if (binString == "DEFAULT") {
             launchInput();
-        } else {
+        }         else {
+
 
             String[] bins = TextUtils.split(binString, ";");
 
@@ -103,17 +131,34 @@ public class MainActivity extends AppCompatActivity {
             arrayAdapter = new MyAdapter(MainActivity.this, binList);
             listView.setAdapter(arrayAdapter);
 
+            String stringDate = extractDate(bins[0]);
+
+
         }
 
-        String address = prefs.getString("address", "DEFAULT");
+    }
 
-        if (address != "DEFAULT") {
+    private String extractDate(String binDate) {
 
-            String shortAddress = address.substring(0, address.indexOf(","));
-            postText.setText(shortAddress);
-            check();
+        int length = binDate.length();
+        String stringDate = binDate.substring(length-10, length);
+        return stringDate;
+    }
+
+    private String shortenAddress(String address) {
+        String shortAddress = address.substring(0, address.indexOf(","));
+
+        String[] splitAddress = shortAddress.split(" ");
+
+        for (int i = 0 ; i < (splitAddress.length); i++) {
+            String first = splitAddress[i].substring(0,1);
+            String second = splitAddress[i].substring(1,splitAddress[i].length());
+            splitAddress[i] = first + second.toLowerCase();
         }
 
+        shortAddress = TextUtils.join(" ", splitAddress);
+
+        return shortAddress;
     }
 
 
@@ -133,7 +178,6 @@ public class MainActivity extends AppCompatActivity {
     private class DownloadWebpageTask extends AsyncTask<String, Void, ArrayList> {
 
         @Override
-
         protected ArrayList doInBackground(String... urls) {
 
 
@@ -182,7 +226,7 @@ public class MainActivity extends AppCompatActivity {
             UserAgent userAgent = new UserAgent();
             userAgent.visit(myurl);
 
-            userAgent.doc.apply(postText.getText());
+            userAgent.doc.apply(fullAddress);
             userAgent.doc.submit("Search");
 
 
@@ -243,6 +287,12 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    /*
+    public void cancel(View view) {
+        Toast.makeText( getApplicationContext(), "END", Toast.LENGTH_SHORT ).show();
+        mJobScheduler.cancelAll();
+    }
+    */
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
