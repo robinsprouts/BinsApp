@@ -7,10 +7,11 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.DialogFragment;
+
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -35,7 +36,7 @@ import com.jaunt.UserAgent;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class AddressActivity extends AppCompatActivity { //* implements AddressDialogFragment.OnCompleteListener  {
+public class AddressActivity extends AppCompatActivity implements AddressFragment.OnFragmentInteractionListener { //* implements AddressDialogFragment.OnCompleteListener  {
 
     private EditText address;
     private Button ok;
@@ -48,13 +49,14 @@ public class AddressActivity extends AppCompatActivity { //* implements AddressD
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_address);
 
-        address = (EditText) findViewById(R.id.address);
-        ok = (Button) findViewById(R.id.ok);
-        textView2 = (TextView) findViewById(R.id.textView2);
+    }
+
+    @Override
+    public void onFragmentInteraction(Uri uri) {
 
     }
 
-
+/*
     public void spin(View view) {
 
         View layoutView = findViewById(R.id.addressLayout);
@@ -71,19 +73,22 @@ public class AddressActivity extends AppCompatActivity { //* implements AddressD
 
     }
 
-/*
-    public void onComplete(String address) {
-        selectText = address;
-
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(AddressActivity.this);
-
-        final SharedPreferences.Editor edit = prefs.edit();
-        edit.putString("address", selectText);
-        edit.commit();
-    }
 
 
-*/
+
+    /*
+        public void onComplete(String address) {
+            selectText = address;
+
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(AddressActivity.this);
+
+            final SharedPreferences.Editor edit = prefs.edit();
+            edit.putString("address", selectText);
+            edit.commit();
+        }
+
+
+
     private class GetAddressTask extends AsyncTask<String, Void, ArrayList> {
 
         @Override
@@ -107,7 +112,6 @@ public class AddressActivity extends AppCompatActivity { //* implements AddressD
                 arrayList.remove(0);
             }
 
-            dialogList(arrayList);
 
         }
     }
@@ -151,14 +155,6 @@ public class AddressActivity extends AppCompatActivity { //* implements AddressD
 
     }
 
-    public void dialogList(ArrayList arrayList) {
-        Bundle bundle = new Bundle();
-        bundle.putStringArrayList("list", arrayList);
-
-        AddressDialogFragment dialog = new AddressDialogFragment();
-        dialog.setArguments(bundle);
-        dialog.show(getSupportFragmentManager(), "dialog");
-    }
 
     /* menu */
 

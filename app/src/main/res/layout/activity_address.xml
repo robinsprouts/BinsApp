@@ -16,40 +16,12 @@
         android:id="@+id/layout"
         android:gravity="center">
 
-        <LinearLayout
-            android:orientation="horizontal"
+        <fragment
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/layout2">
-
-            <EditText
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:inputType="textPostalAddress"
-                android:ems="10"
-                android:id="@+id/address"
-                android:contentDescription="address"
-                android:autoText="false"
-                android:text="167 CF244RX"
-                android:layout_weight="1"
-                android:textSize="20sp" />
-
-            <Button
-                style="?android:attr/buttonStyleSmall"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Lookup"
-                android:id="@+id/ok"
-                android:onClick="spin"
-                android:layout_weight="1" />
-        </LinearLayout>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="Large Text"
-            android:id="@+id/textView2" />
+            android:name="com.example.sprouts.binapp.AddressFragment"
+            android:id="@+id/activityfragment"
+            android:layout_gravity="center_horizontal" />
 
     </LinearLayout>
 </RelativeLayout>

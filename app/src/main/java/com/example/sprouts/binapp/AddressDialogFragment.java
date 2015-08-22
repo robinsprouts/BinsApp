@@ -1,11 +1,12 @@
 package com.example.sprouts.binapp;
 
 import android.app.Activity;
+import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
-import android.support.v4.app.DialogFragment;
+
 import android.support.v7.internal.widget.AdapterViewCompat;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,7 +20,7 @@ import android.widget.Spinner;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AddressDialogFragment extends DialogFragment /* implements AdapterViewCompat.OnItemClickListener*/ {
+public class AddressDialogFragment extends DialogFragment implements AdapterView.OnItemClickListener /* implements AdapterViewCompat.OnItemClickListener*/ {
 
     private ListView list;
     private String addressOutput;
@@ -49,18 +50,23 @@ public class AddressDialogFragment extends DialogFragment /* implements AdapterV
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter(getActivity(), android.R.layout.simple_list_item_1, arrayList);
 
         list.setAdapter(arrayAdapter);
+        list.setOnItemClickListener(this);
 
         // list.setOnItemClickListener(this);
     }
 
-    /*
+
+
     @Override
-    public void onItemClick(AdapterViewCompat<?> parent, View view, int position, long id) {
-        // addressOutput = arrayList.get(position);
-        addressOutput = "168 Inverness Place";
-        mListener.onComplete(addressOutput);
-        dismiss();
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            addressOutput = arrayList.get(position);
+            addressOutput = "168 Inverness Place";
+            /*mListener.onComplete(addressOutput);*/
+            dismiss();
     }
+
+
+/*
 
     public interface OnCompleteListener {
         public void onComplete(String address);
