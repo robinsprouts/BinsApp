@@ -105,23 +105,28 @@ public class MainActivity extends AppCompatActivity {
 
         fullAddress = address;
 
+        postText.setText(address);
+
+        /*
         if (address != "DEFAULT") {
 
             String shortAddress = shortenAddress(address);
 
             postText.setText(shortAddress);
 
-            check();
+            //* check();
+
         } else {
-            launchInput();
+
+            //* launchInput();
+
+            postText.setText(address);
         }
 
+*/
         String binString = prefs.getString("bins", "DEFAULT");
 
-        if (binString == "DEFAULT") {
-            launchInput();
-        }         else {
-
+        if (binString.contains(";")) {
 
             String[] bins = TextUtils.split(binString, ";");
 
@@ -133,10 +138,13 @@ public class MainActivity extends AppCompatActivity {
 
             String stringDate = extractDate(bins[0]);
 
+        } else {
+            launchInput();
 
         }
 
     }
+
 
     private String extractDate(String binDate) {
 
@@ -330,6 +338,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void launchInput() {
+
+        postText.setText("hmm");
 
         Intent intent = new Intent(this, AddressActivity.class);
         startActivity(intent);

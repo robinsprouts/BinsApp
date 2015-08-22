@@ -1,6 +1,7 @@
 package com.example.sprouts.binapp;
 
 import android.app.Activity;
+import android.app.FragmentManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -34,11 +35,11 @@ import com.jaunt.UserAgent;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class AddressActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener  {
+public class AddressActivity extends AppCompatActivity { //* implements AddressDialogFragment.OnCompleteListener  {
 
     private EditText address;
     private Button ok;
-    private Spinner spinner;
+    private TextView textView2;
     private String selectText;
 
 
@@ -49,23 +50,12 @@ public class AddressActivity extends AppCompatActivity implements AdapterView.On
 
         address = (EditText) findViewById(R.id.address);
         ok = (Button) findViewById(R.id.ok);
-
-        spinner = (Spinner) findViewById(R.id.spinner);
-        spinner.setOnItemSelectedListener(this);
-
-        OnClickListener onClickListener = new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                spin();
-            }
-        };
-
-        ok.setOnClickListener(onClickListener);
+        textView2 = (TextView) findViewById(R.id.textView2);
 
     }
 
 
-    public void spin() {
+    public void spin(View view) {
 
         View layoutView = findViewById(R.id.addressLayout);
 
@@ -81,32 +71,22 @@ public class AddressActivity extends AppCompatActivity implements AdapterView.On
 
     }
 
-
-
-    @Override
-    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
-
-        selectText = (String) parent.getItemAtPosition(position);
+/*
+    public void onComplete(String address) {
+        selectText = address;
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(AddressActivity.this);
 
         final SharedPreferences.Editor edit = prefs.edit();
         edit.putString("address", selectText);
         edit.commit();
-
-
     }
 
-    @Override
-    public void onNothingSelected(AdapterView<?> parent) {
 
-    }
-
+*/
     private class GetAddressTask extends AsyncTask<String, Void, ArrayList> {
 
         @Override
-
         protected ArrayList doInBackground(String... urls) {
 
             ArrayList<String> a = new ArrayList();
@@ -127,9 +107,7 @@ public class AddressActivity extends AppCompatActivity implements AdapterView.On
                 arrayList.remove(0);
             }
 
-            ArrayAdapter<String> arrayAdapter = new ArrayAdapter(AddressActivity.this, android.R.layout.simple_spinner_dropdown_item, arrayList);
-
-            spinner.setAdapter(arrayAdapter);
+            dialogList(arrayList);
 
         }
     }
@@ -170,9 +148,17 @@ public class AddressActivity extends AppCompatActivity implements AdapterView.On
 
         return addressList;
 
+
     }
 
+    public void dialogList(ArrayList arrayList) {
+        Bundle bundle = new Bundle();
+        bundle.putStringArrayList("list", arrayList);
 
+        AddressDialogFragment dialog = new AddressDialogFragment();
+        dialog.setArguments(bundle);
+        dialog.show(getSupportFragmentManager(), "dialog");
+    }
 
     /* menu */
 

@@ -1,19 +1,30 @@
 package com.example.sprouts.binapp;
 
 import android.app.Activity;
+import android.app.FragmentManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.support.v4.app.DialogFragment;
+import android.support.v7.internal.widget.AdapterViewCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.Spinner;
 
-public class AddressDialogFragment extends DialogFragment {
+import java.util.ArrayList;
+import java.util.List;
 
-    private Spinner spin;
+public class AddressDialogFragment extends DialogFragment /* implements AdapterViewCompat.OnItemClickListener*/ {
+
+    private ListView list;
+    private String addressOutput;
+
+    ArrayList<String> arrayList = new ArrayList();
 
     public AddressDialogFragment() {
         // Required empty public constructor
@@ -23,12 +34,49 @@ public class AddressDialogFragment extends DialogFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_address_dialog, container);
-        spin = (Spinner) view.findViewById(R.id.spinner);
+        list = (ListView) view.findViewById(R.id.dialoglist);
 
-        getDialog().setTitle("Hello");
+        Bundle bundle = getArguments();
+        arrayList = bundle.getStringArrayList("list");
 
         return view;
     }
 
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
 
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter(getActivity(), android.R.layout.simple_list_item_1, arrayList);
+
+        list.setAdapter(arrayAdapter);
+
+        // list.setOnItemClickListener(this);
+    }
+
+    /*
+    @Override
+    public void onItemClick(AdapterViewCompat<?> parent, View view, int position, long id) {
+        // addressOutput = arrayList.get(position);
+        addressOutput = "168 Inverness Place";
+        mListener.onComplete(addressOutput);
+        dismiss();
+    }
+
+    public interface OnCompleteListener {
+        public void onComplete(String address);
+    }
+
+    private OnCompleteListener mListener;
+
+    // make sure the Activity implemented it
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            this.mListener = (OnCompleteListener)activity;
+        }
+        catch (final ClassCastException e) {
+            throw new ClassCastException(activity.toString() + " must implement OnCompleteListener");
+        }
+    }
+*/
 }
