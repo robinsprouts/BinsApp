@@ -36,7 +36,7 @@ import com.jaunt.UserAgent;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class AddressActivity extends AppCompatActivity implements AddressFragment.OnFragmentInteractionListener { //* implements AddressDialogFragment.OnCompleteListener  {
+public class AddressActivity extends AppCompatActivity implements AddressDialogFragment.OnCompleteListener  {
 
     private EditText address;
     private Button ok;
@@ -49,12 +49,10 @@ public class AddressActivity extends AppCompatActivity implements AddressFragmen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_address);
 
-    }
-
-    @Override
-    public void onFragmentInteraction(Uri uri) {
+        address = (EditText) findViewById(R.id.address1);
 
     }
+
 
 /*
     public void spin(View view) {
@@ -179,5 +177,18 @@ public class AddressActivity extends AppCompatActivity implements AddressFragmen
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onComplete(String string) {
+        address.setText(string);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(AddressActivity.this);
+
+        final SharedPreferences.Editor edit = prefs.edit();
+        edit.putString("address", string);
+        edit.commit();
+
+        View layoutView = findViewById(R.id.layout);
+        Snackbar.make(layoutView, string, Snackbar.LENGTH_LONG).show();
     }
 }

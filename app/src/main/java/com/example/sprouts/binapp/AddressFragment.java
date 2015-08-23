@@ -12,6 +12,7 @@ import android.os.Bundle;
 
 import android.support.design.widget.Snackbar;
 
+import android.text.Layout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,24 +29,9 @@ import com.jaunt.UserAgent;
 import java.io.IOException;
 import java.util.ArrayList;
 
-
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link AddressFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link AddressFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
-public class AddressFragment extends Fragment {
+public class AddressFragment extends Fragment implements AddressDialogFragment.OnCompleteListener {
 
     private EditText address;
-    private Button ok;
-    private TextView textView2;
-    private String selectText;
-
-    private OnFragmentInteractionListener mListener;
-
 
     public static AddressFragment newInstance(String param1, String param2) {
 
@@ -70,7 +56,21 @@ public class AddressFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_address, container, false);
+
+        View view = inflater.inflate(R.layout.fragment_address, container, false);
+
+        Button button = (Button) view.findViewById(R.id.ok1);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                lookup();
+            }
+        });
+
+
+
+
+        return view;
 
     }
 
@@ -78,9 +78,7 @@ public class AddressFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        textView2 = (TextView) getView().findViewById(R.id.textView2);
-
-        textView2.setText("MOO");
+        address = (EditText) getView().findViewById(R.id.address1);
     }
 
     @Override
@@ -89,37 +87,22 @@ public class AddressFragment extends Fragment {
 
     }
 
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try {
-            mListener = (OnFragmentInteractionListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
-    }
-
-
     /** main methods **/
 
-    /* For some reason this onclick isn't clicking!*/
 
-    public void lookup(View view) {
+    public void lookup() {
 
-        View layoutView = getView().findViewById(R.id.addressLayout);
+        View layoutView = getView();
 
         String stringUrl = "https://wastemanagementcalendar.cardiff.gov.uk/English.aspx";
         ConnectivityManager connMgr = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
         if (networkInfo != null && networkInfo.isConnected()) {
+
+
+
             new GetAddressTask().execute(stringUrl);
+
             Snackbar.make(layoutView, "Updating", Snackbar.LENGTH_SHORT).show();
         } else {
             Snackbar.make(layoutView, "Connecting", Snackbar.LENGTH_SHORT).show();
@@ -127,6 +110,12 @@ public class AddressFragment extends Fragment {
 
     }
 
+    @Override
+    public void onComplete(String a) {
+        View layoutView = getView();
+        Snackbar.make(layoutView, a, Snackbar.LENGTH_LONG).show();
+        address.setText(a);
+    }
 
 
     /*
@@ -215,24 +204,6 @@ public class AddressFragment extends Fragment {
         AddressDialogFragment dialog = new AddressDialogFragment();
         dialog.setArguments(bundle);
         dialog.show(getFragmentManager(), "dialog");
-    }
-
-
-
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        public void onFragmentInteraction(Uri uri);
     }
 
 }

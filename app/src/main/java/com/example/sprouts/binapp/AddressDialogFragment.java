@@ -1,8 +1,11 @@
 package com.example.sprouts.binapp;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.FragmentManager;
+import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
@@ -20,7 +23,7 @@ import android.widget.Spinner;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AddressDialogFragment extends DialogFragment implements AdapterView.OnItemClickListener /* implements AdapterViewCompat.OnItemClickListener*/ {
+public class AddressDialogFragment extends DialogFragment {
 
     private ListView list;
     private String addressOutput;
@@ -31,6 +34,31 @@ public class AddressDialogFragment extends DialogFragment implements AdapterView
         // Required empty public constructor
     }
 
+
+    @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+
+        Bundle bundle = getArguments();
+        arrayList = bundle.getStringArrayList("list");
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter(getActivity(), android.R.layout.simple_list_item_1, arrayList);
+
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle(R.string.dialog_title)
+                .setAdapter(arrayAdapter, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        String address = arrayList.get(which);
+
+                        mListener.onComplete(address);
+
+                    }
+                });
+
+        return builder.create();
+    }
+
+    /*
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -61,15 +89,15 @@ public class AddressDialogFragment extends DialogFragment implements AdapterView
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             addressOutput = arrayList.get(position);
             addressOutput = "168 Inverness Place";
-            /*mListener.onComplete(addressOutput);*/
+            mListener.onComplete(addressOutput);
             dismiss();
     }
 
 
-/*
+*/
 
     public interface OnCompleteListener {
-        public void onComplete(String address);
+        public void onComplete(String string);
     }
 
     private OnCompleteListener mListener;
@@ -84,5 +112,5 @@ public class AddressDialogFragment extends DialogFragment implements AdapterView
             throw new ClassCastException(activity.toString() + " must implement OnCompleteListener");
         }
     }
-*/
+
 }
