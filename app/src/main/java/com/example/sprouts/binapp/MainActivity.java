@@ -1,59 +1,41 @@
 package com.example.sprouts.binapp;
 
+import android.app.AlarmManager;
 import android.app.NotificationManager;
-import android.content.ComponentName;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.DataSetObserver;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
-import android.preference.PreferenceActivity;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.jaunt.Document;
 import com.jaunt.Element;
 import com.jaunt.Elements;
 import com.jaunt.JauntException;
 import com.jaunt.UserAgent;
 
-import org.w3c.dom.DOMConfiguration;
-
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.prefs.Preferences;
 
 /* TO DO: I need to update the binList each time the address is refreshed (in AddressActivity) *and* in the MainActivity when the app first opens, and at regular intervals using an alarm
 
@@ -65,20 +47,24 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String DEBUG_TAG = "Bins";
     private TextView postText;
+    private TextView timeText;
     private String fullAddress;
     private Date firstDate;
+    private int min;
 
+    private AlarmManager alarmMgr;
+
+    private PendingIntent pendingIntent;
 
     ArrayAdapter<String> arrayAdapter;
-
-    NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this).setSmallIcon(R.drawable.notification_template_icon_bg).setContentTitle("HELLO").setContentText("HELLOOO");
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         postText = (TextView) findViewById(R.id.textView);
+
+        timeText = (TextView) findViewById(R.id.time);
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
@@ -95,6 +81,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+
     @Override
     public void onStart() {
         super.onStart();
@@ -107,23 +94,23 @@ public class MainActivity extends AppCompatActivity {
 
         postText.setText(address);
 
-        /*
-        if (address != "DEFAULT") {
+        setNow();
+
+
+        if (address.contains(",")) {
 
             String shortAddress = shortenAddress(address);
 
             postText.setText(shortAddress);
 
-            //* check();
+            check();
 
         } else {
 
-            //* launchInput();
+            launchInput();
 
-            postText.setText(address);
         }
 
-*/
         String binString = prefs.getString("bins", "DEFAULT");
 
         if (binString.contains(";")) {
@@ -136,7 +123,8 @@ public class MainActivity extends AppCompatActivity {
             arrayAdapter = new MyAdapter(MainActivity.this, binList);
             listView.setAdapter(arrayAdapter);
 
-            String stringDate = extractDate(bins[0]);
+            Date firstDate = extractDate(bins[0]);
+
 
         } else {
             launchInput();
@@ -145,11 +133,90 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void setNow(){
+        Calendar rightNow = Calendar.getInstance();
+        SimpleDateFormat df1 = new SimpleDateFormat("HH");
+        SimpleDateFormat df2 = new SimpleDateFormat("mm");
+        SimpleDateFormat df3 = new SimpleDateFormat("ss");
 
-    private String extractDate(String binDate) {
+        String hour = df1.format(rightNow.getTime());
+        String minute = df2.format(rightNow.getTime());
+        String second = df3.format(rightNow.getTime());
+
+
+        timeText.setText(hour +" "+ minute +" "+second);
+    }
+
+    public void ok(View view) {
+
+        setAlarm();
+
+    }
+
+
+    private void setAlarm() {
+
+        Calendar calendar = Calendar.getInstance();
+
+        min = 36;
+
+        calendar.set(Calendar.MINUTE, min);
+        calendar.set(Calendar.SECOND, 0);
+
+        SimpleDateFormat df1 = new SimpleDateFormat("HH");
+        SimpleDateFormat df2 = new SimpleDateFormat("mm");
+        SimpleDateFormat df3 = new SimpleDateFormat("ss");
+
+        String hour = df1.format(calendar.getTime());
+        String minute = df2.format(calendar.getTime());
+        String second = df3.format(calendar.getTime());
+
+
+        timeText.setText(hour + " " + minute + " " + second);
+
+
+        Intent myIntent = new Intent(MainActivity.this, MyReceiver.class);
+
+        pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0, myIntent, 0);
+
+        alarmMgr = (AlarmManager) getSystemService(ALARM_SERVICE);
+
+        // should probably be set not setexact, and not sure if I really need wakeup...
+
+        alarmMgr.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+
+
+    }
+
+    private Date extractDate(String binDate) {
+
+        SimpleDateFormat inputFormat = new SimpleDateFormat("EEEE d MMMM");
+
+        Date date = new Date();
+        try {
+            date = inputFormat.parse(binDate);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        return date;
+    }
+
+    private String convertDate(String binDate) {
 
         int length = binDate.length();
-        String stringDate = binDate.substring(length-10, length);
+        String stringDate = binDate.substring(length - 10, length);
+
+        SimpleDateFormat inputFormat = new SimpleDateFormat("dd/MM/yy");
+        SimpleDateFormat outputFormat = new SimpleDateFormat("EEEE d MMMM");
+
+        try {
+            Date date = inputFormat.parse(stringDate);
+            stringDate = outputFormat.format(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
         return stringDate;
     }
 
@@ -215,14 +282,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
-    public void notification() {
-        int mNotificationId = 001;
-
-        NotificationManager mNot = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        mNot.notify(mNotificationId, mBuilder.build());
-    }
-
     private ArrayList jaunty(String myurl) throws IOException {
 
 
@@ -261,6 +320,9 @@ public class MainActivity extends AppCompatActivity {
                             switch (col)
                             {
                                 case 0:
+
+                                    binText = convertDate(binText);
+
                                     bins[0] = binText;
                                     break;
 
@@ -338,8 +400,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void launchInput() {
-
-        postText.setText("hmm");
 
         Intent intent = new Intent(this, AddressActivity.class);
         startActivity(intent);

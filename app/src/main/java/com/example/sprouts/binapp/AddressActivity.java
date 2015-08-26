@@ -53,109 +53,18 @@ public class AddressActivity extends AppCompatActivity implements AddressDialogF
 
     }
 
+    @Override
+    public void onComplete(String string) {
+        address.setText(string);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(AddressActivity.this);
 
-/*
-    public void spin(View view) {
+        final SharedPreferences.Editor edit = prefs.edit();
+        edit.putString("address", string);
+        edit.commit();
 
-        View layoutView = findViewById(R.id.addressLayout);
-
-        String stringUrl = "https://wastemanagementcalendar.cardiff.gov.uk/English.aspx";
-        ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-        if (networkInfo != null && networkInfo.isConnected()) {
-            new GetAddressTask().execute(stringUrl);
-            Snackbar.make(layoutView, "Updating", Snackbar.LENGTH_SHORT).show();
-        } else {
-            Snackbar.make(layoutView, "Connecting", Snackbar.LENGTH_SHORT).show();
-        }
-
+        View layoutView = findViewById(R.id.layout);
+        Snackbar.make(layoutView, string, Snackbar.LENGTH_LONG).show();
     }
-
-
-
-
-    /*
-        public void onComplete(String address) {
-            selectText = address;
-
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(AddressActivity.this);
-
-            final SharedPreferences.Editor edit = prefs.edit();
-            edit.putString("address", selectText);
-            edit.commit();
-        }
-
-
-
-    private class GetAddressTask extends AsyncTask<String, Void, ArrayList> {
-
-        @Override
-        protected ArrayList doInBackground(String... urls) {
-
-            ArrayList<String> a = new ArrayList();
-
-            try {
-                return jaunty2(urls[0]);
-            } catch (IOException e) {
-                Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
-                return a;
-            }
-
-        }
-
-        @Override
-        protected void onPostExecute(ArrayList arrayList) {
-
-            if (arrayList.size() == 2) {
-                arrayList.remove(0);
-            }
-
-
-        }
-    }
-
-    private ArrayList jaunty2(String myurl) throws IOException {
-
-        ArrayList<String> addressList = new ArrayList();
-
-        String addString = address.getText().toString();
-
-        try {
-
-            UserAgent userAgent = new UserAgent();
-
-            userAgent.visit(myurl);
-            userAgent.doc.apply(addString);
-            userAgent.doc.submit("Search");
-
-            Element element = userAgent.doc.findFirst("<select id = droAddress>");
-
-            element.findFirst("<option>");
-
-            Elements options = element.findEach("<option>");
-
-
-            for (Element option : options) {
-
-                String text = option.getText();
-                addressList.add(text);
-            }
-
-
-        } catch (JauntException e) {
-            System.err.println(e);
-            return addressList;
-        }
-
-
-        return addressList;
-
-
-    }
-
-
-    /* menu */
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -179,16 +88,4 @@ public class AddressActivity extends AppCompatActivity implements AddressDialogF
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onComplete(String string) {
-        address.setText(string);
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(AddressActivity.this);
-
-        final SharedPreferences.Editor edit = prefs.edit();
-        edit.putString("address", string);
-        edit.commit();
-
-        View layoutView = findViewById(R.id.layout);
-        Snackbar.make(layoutView, string, Snackbar.LENGTH_LONG).show();
-    }
 }
