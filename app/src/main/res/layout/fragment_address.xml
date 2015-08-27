@@ -1,6 +1,8 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/frame_layout"
     tools:context="com.example.sprouts.binapp.AddressFragment">
 
@@ -19,9 +21,10 @@
         android:id="@+id/address1"
         android:contentDescription="address"
         android:autoText="false"
-        android:text="167 CF244RX"
         android:layout_weight="1"
-        android:textSize="20sp" />
+        android:textSize="20sp"
+        android:hint="please enter your address (first line, or number and postcode)"/>
+
 
     <Button
         style="?android:attr/buttonStyleSmall"
@@ -29,7 +32,6 @@
         android:layout_height="wrap_content"
         android:text="Lookup"
         android:id="@+id/ok1"
-        android:onClick="lookup"
         android:layout_weight="1" />
 
     </LinearLayout>

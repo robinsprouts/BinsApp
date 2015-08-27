@@ -1,8 +1,8 @@
 <resources>
 
     <color name="black_overlay">#66000000</color>
-    <color name="statusBarColor">#008800</color>
-    <color name="black">#008800</color>
+    <color name="statusBarColor">#006400</color>
+    <color name="black">#009600</color>
     <color name="primary_material_dark">#00bb00</color>
     <color name="primary_dark_material_dark">#008800</color>
 

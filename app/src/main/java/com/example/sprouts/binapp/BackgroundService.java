@@ -1,13 +1,9 @@
 package com.example.sprouts.binapp;
 
-import android.app.Service;
 import android.app.job.JobParameters;
 import android.app.job.JobService;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.os.Handler;
-import android.os.Message;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.widget.Toast;

@@ -1,7 +1,6 @@
 package com.example.sprouts.binapp;
 
 import android.app.AlarmManager;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -9,10 +8,8 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
-import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -20,6 +17,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -48,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String DEBUG_TAG = "Bins";
     private TextView postText;
     private TextView timeText;
+    private EditText editText;
     private String fullAddress;
     private Date firstDate;
     private int min;
@@ -63,21 +62,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         postText = (TextView) findViewById(R.id.textView);
-
+        editText = (EditText) findViewById(R.id.editText);
         timeText = (TextView) findViewById(R.id.time);
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
-
-        /*
-        mJobScheduler = (JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE);
-
-        JobInfo.Builder builder = new JobInfo.Builder(1, new ComponentName(getPackageName(), BackgroundService.class.getName()));
-
-        builder.setPeriodic(60000);
-        if( mJobScheduler.schedule( builder.build() ) <= 0 ) {
-//If something goes wrong
-        }
-        */
 
     }
 
@@ -94,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
 
         postText.setText(address);
 
-        setNow();
+
 
 
         if (address.contains(",")) {
@@ -123,8 +111,7 @@ public class MainActivity extends AppCompatActivity {
             arrayAdapter = new MyAdapter(MainActivity.this, binList);
             listView.setAdapter(arrayAdapter);
 
-            Date firstDate = extractDate(bins[0]);
-
+            setNow(bins[0]);
 
         } else {
             launchInput();
@@ -133,7 +120,33 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void setNow(){
+    private void setNow(String inputDate){
+
+        SimpleDateFormat inputFormat = new SimpleDateFormat("EEEE d MMMM yyyy");
+
+        SimpleDateFormat df1 = new SimpleDateFormat("dd");
+        SimpleDateFormat df2 = new SimpleDateFormat("MM");
+        SimpleDateFormat df3 = new SimpleDateFormat("yy");
+
+        String day = "DAY";
+        String month = "MONTH";
+        String year = "YEAR";
+
+        try {
+            Date date = inputFormat.parse(inputDate);
+            day = df1.format(date);
+            month = df2.format(date);
+            year = df3.format(date);
+            timeText.setText(day +" "+ month +" "+year);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+
+        timeText.setText(day +" "+ month +" "+year);
+    }
+
+    private void setThen(){
         Calendar rightNow = Calendar.getInstance();
         SimpleDateFormat df1 = new SimpleDateFormat("HH");
         SimpleDateFormat df2 = new SimpleDateFormat("mm");
@@ -158,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
 
         Calendar calendar = Calendar.getInstance();
 
-        min = 36;
+        min = Integer.parseInt(editText.getText().toString());
 
         calendar.set(Calendar.MINUTE, min);
         calendar.set(Calendar.SECOND, 0);
@@ -190,7 +203,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Date extractDate(String binDate) {
 
-        SimpleDateFormat inputFormat = new SimpleDateFormat("EEEE d MMMM");
+        SimpleDateFormat inputFormat = new SimpleDateFormat("EEEE d MMMM yyyy");
 
         Date date = new Date();
         try {
@@ -208,7 +221,7 @@ public class MainActivity extends AppCompatActivity {
         String stringDate = binDate.substring(length - 10, length);
 
         SimpleDateFormat inputFormat = new SimpleDateFormat("dd/MM/yy");
-        SimpleDateFormat outputFormat = new SimpleDateFormat("EEEE d MMMM");
+        SimpleDateFormat outputFormat = new SimpleDateFormat("EEEE d MMMM yyyy");
 
         try {
             Date date = inputFormat.parse(stringDate);
