@@ -9,15 +9,22 @@ import android.os.Bundle;
 
 import android.support.design.widget.Snackbar;
 
+import android.support.design.widget.TextInputLayout;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.jaunt.Element;
 import com.jaunt.Elements;
+import com.jaunt.HttpResponse;
 import com.jaunt.JauntException;
+import com.jaunt.ResponseException;
+import com.jaunt.SearchException;
 import com.jaunt.UserAgent;
 
 import java.io.IOException;
@@ -26,6 +33,14 @@ import java.util.ArrayList;
 public class AddressFragment extends Fragment implements AddressDialogFragment.OnCompleteListener {
 
     private EditText address;
+
+    private String errorText;
+
+    private TextInputLayout textInputLayout;
+
+    private Button button;
+
+    private TextView counter;
 
     public static AddressFragment newInstance(String param1, String param2) {
 
@@ -53,7 +68,7 @@ public class AddressFragment extends Fragment implements AddressDialogFragment.O
 
         View view = inflater.inflate(R.layout.fragment_address, container, false);
 
-        Button button = (Button) view.findViewById(R.id.ok1);
+        button = (Button) view.findViewById(R.id.ok1);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -62,7 +77,13 @@ public class AddressFragment extends Fragment implements AddressDialogFragment.O
         });
 
 
+        textInputLayout = (TextInputLayout) view.findViewById(R.id.til);
+        textInputLayout.setErrorEnabled(true);
 
+        // counter = (TextView) view.findViewById(R.id.updatebox);
+
+
+        button.setEnabled(false);
 
         return view;
 
@@ -73,6 +94,7 @@ public class AddressFragment extends Fragment implements AddressDialogFragment.O
         super.onActivityCreated(savedInstanceState);
 
         address = (EditText) getView().findViewById(R.id.address1);
+        address.addTextChangedListener(watcher);
     }
 
     @Override
@@ -86,45 +108,17 @@ public class AddressFragment extends Fragment implements AddressDialogFragment.O
 
     public void lookup() {
 
-        View layoutView = getView();
-
         String stringUrl = "https://wastemanagementcalendar.cardiff.gov.uk/English.aspx";
-        ConnectivityManager connMgr = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-        if (networkInfo != null && networkInfo.isConnected()) {
-
-
 
             new GetAddressTask().execute(stringUrl);
-
-            Snackbar.make(layoutView, "Updating", Snackbar.LENGTH_SHORT).show();
-        } else {
-            Snackbar.make(layoutView, "Connecting", Snackbar.LENGTH_SHORT).show();
-        }
-
     }
 
     @Override
     public void onComplete(String a) {
-        View layoutView = getView();
-        Snackbar.make(layoutView, a, Snackbar.LENGTH_LONG).show();
         address.setText(a);
+
     }
 
-
-    /*
-        public void onComplete(String address) {
-            selectText = address;
-
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(AddressActivity.this);
-
-            final SharedPreferences.Editor edit = prefs.edit();
-            edit.putString("address", selectText);
-            edit.commit();
-        }
-
-
-    */
     private class GetAddressTask extends AsyncTask<String, Void, ArrayList> {
 
         @Override
@@ -147,8 +141,13 @@ public class AddressFragment extends Fragment implements AddressDialogFragment.O
                 arrayList.remove(0);
             }
 
-            dialogList(arrayList);
-
+            if (errorText != null) {
+                textInputLayout.setError(errorText);
+                errorText = null;
+            } else {
+                textInputLayout.setError(null);
+                dialogList(arrayList);
+            }
         }
     }
 
@@ -180,8 +179,26 @@ public class AddressFragment extends Fragment implements AddressDialogFragment.O
             }
 
 
-        } catch (JauntException e) {
+        } catch (ResponseException e) {
             System.err.println(e);
+
+            HttpResponse response = e.getResponse();
+            if (response != null) {
+                errorText = "HTTP error";
+            }
+            else {
+                errorText = "connection error";
+            };
+            return addressList;
+        }
+        catch (SearchException e) {
+            System.err.println(e);
+            errorText = "address not found";
+            return addressList;
+
+        } catch (JauntException e) {
+            e.printStackTrace();
+            errorText = e.toString();
             return addressList;
         }
 
@@ -199,5 +216,31 @@ public class AddressFragment extends Fragment implements AddressDialogFragment.O
         dialog.setArguments(bundle);
         dialog.show(getFragmentManager(), "dialog");
     }
+
+    private TextWatcher watcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            String input = s.toString();
+            int len = input.length();
+
+            if (len >= 3) {
+                button.setEnabled(true);
+            } else {
+                button.setEnabled(false);
+            }
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+
+        }
+    };
 
 }

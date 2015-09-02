@@ -10,8 +10,8 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -46,9 +46,9 @@ public class MainActivity extends AppCompatActivity {
     private static final String DEBUG_TAG = "Bins";
     private TextView postText;
     private TextView timeText;
-    private EditText editText;
     private String fullAddress;
-    private Date firstDate;
+    private String firstDate;
+    private boolean reminder;
     private int min;
 
     private AlarmManager alarmMgr;
@@ -62,7 +62,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         postText = (TextView) findViewById(R.id.textView);
-        editText = (EditText) findViewById(R.id.editText);
         timeText = (TextView) findViewById(R.id.time);
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
@@ -78,12 +77,14 @@ public class MainActivity extends AppCompatActivity {
 
         String address = prefs.getString("address", "DEFAULT");
 
+        firstDate = prefs.getString("firstDate", "DEFAULT");
+
+        reminder = prefs.getBoolean("pref_reminder", true);
+
+
         fullAddress = address;
 
         postText.setText(address);
-
-
-
 
         if (address.contains(",")) {
 
@@ -99,6 +100,7 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
+        prefs = PreferenceManager.getDefaultSharedPreferences(this);
         String binString = prefs.getString("bins", "DEFAULT");
 
         if (binString.contains(";")) {
@@ -111,94 +113,72 @@ public class MainActivity extends AppCompatActivity {
             arrayAdapter = new MyAdapter(MainActivity.this, binList);
             listView.setAdapter(arrayAdapter);
 
-            setNow(bins[0]);
-
         } else {
             launchInput();
 
         }
 
+        if (firstDate != "DEFAULT") {
+            setAlarm(firstDate);
+        }
+
     }
 
-    private void setNow(String inputDate){
+    private void setAlarm(String date) {
+
+        Calendar calendar = Calendar.getInstance();
+
+        Calendar current = calendar;
 
         SimpleDateFormat inputFormat = new SimpleDateFormat("EEEE d MMMM yyyy");
 
-        SimpleDateFormat df1 = new SimpleDateFormat("dd");
-        SimpleDateFormat df2 = new SimpleDateFormat("MM");
-        SimpleDateFormat df3 = new SimpleDateFormat("yy");
 
-        String day = "DAY";
-        String month = "MONTH";
-        String year = "YEAR";
+        Date alarmDate = null;
 
         try {
-            Date date = inputFormat.parse(inputDate);
-            day = df1.format(date);
-            month = df2.format(date);
-            year = df3.format(date);
-            timeText.setText(day +" "+ month +" "+year);
+            alarmDate = inputFormat.parse(date);
         } catch (ParseException e) {
             e.printStackTrace();
         }
 
-
-        timeText.setText(day +" "+ month +" "+year);
-    }
-
-    private void setThen(){
-        Calendar rightNow = Calendar.getInstance();
-        SimpleDateFormat df1 = new SimpleDateFormat("HH");
-        SimpleDateFormat df2 = new SimpleDateFormat("mm");
-        SimpleDateFormat df3 = new SimpleDateFormat("ss");
-
-        String hour = df1.format(rightNow.getTime());
-        String minute = df2.format(rightNow.getTime());
-        String second = df3.format(rightNow.getTime());
-
-
-        timeText.setText(hour +" "+ minute +" "+second);
-    }
-
-    public void ok(View view) {
-
-        setAlarm();
-
-    }
-
-
-    private void setAlarm() {
-
-        Calendar calendar = Calendar.getInstance();
-
-        min = Integer.parseInt(editText.getText().toString());
-
-        calendar.set(Calendar.MINUTE, min);
+        calendar.setTime(alarmDate);
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
+        calendar.add(Calendar.DAY_OF_MONTH, -1);
 
-        SimpleDateFormat df1 = new SimpleDateFormat("HH");
-        SimpleDateFormat df2 = new SimpleDateFormat("mm");
-        SimpleDateFormat df3 = new SimpleDateFormat("ss");
+        SimpleDateFormat df1 = new SimpleDateFormat("dd");
 
-        String hour = df1.format(calendar.getTime());
-        String minute = df2.format(calendar.getTime());
-        String second = df3.format(calendar.getTime());
+        String day = df1.format(calendar.getTime());
 
 
-        timeText.setText(hour + " " + minute + " " + second);
+        boolean alarmUp = PendingIntent.getBroadcast(MainActivity.this, 0, new Intent(MainActivity.this, MyReceiver.class), PendingIntent.FLAG_NO_CREATE) != null;
 
+        if (reminder == true) {
 
-        Intent myIntent = new Intent(MainActivity.this, MyReceiver.class);
+            if (alarmUp) {
+                timeText.setText("Alarm already set for " + day);
+            } else {
 
-        pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0, myIntent, 0);
+                timeText.setText("New alarm set for " + day);
 
-        alarmMgr = (AlarmManager) getSystemService(ALARM_SERVICE);
+                Intent myIntent = new Intent(MainActivity.this, MyReceiver.class);
 
-        // should probably be set not setexact, and not sure if I really need wakeup...
+                pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0, myIntent, 0);
 
-        alarmMgr.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+                alarmMgr = (AlarmManager) getSystemService(ALARM_SERVICE);
 
+                alarmMgr.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
 
+            }
+        } else {
+            if (alarmUp) {
+                stopService(new Intent(MainActivity.this, MyReceiver.class));
+                timeText.setText("Alarm stopped");
+            } else {
+                timeText.setText("Alarm not set");
+            }
+        }
     }
 
     private Date extractDate(String binDate) {
@@ -290,6 +270,7 @@ public class MainActivity extends AppCompatActivity {
 
             final SharedPreferences.Editor edit = prefs.edit();
             edit.putString("bins", joined);
+            edit.putString("firstDate", firstDate);
             edit.commit();
 
         }
@@ -337,6 +318,11 @@ public class MainActivity extends AppCompatActivity {
                                     binText = convertDate(binText);
 
                                     bins[0] = binText;
+
+                                    if (row ==1) {
+                                      firstDate = binText;
+                                    };
+
                                     break;
 
                                 case 1:
@@ -369,13 +355,6 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
-
-    /*
-    public void cancel(View view) {
-        Toast.makeText( getApplicationContext(), "END", Toast.LENGTH_SHORT ).show();
-        mJobScheduler.cancelAll();
-    }
-    */
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

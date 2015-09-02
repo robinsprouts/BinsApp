@@ -74,6 +74,7 @@ public class MyService extends Service {
                 .setContentText(bin)
                 .setShowWhen(true)
                 .setContentIntent(launchIntent)
+                .setVibrate(new long[] {500, 500, 500, 500, 500})
                 .build();
 
         NotificationManager mNot = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);

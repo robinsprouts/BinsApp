@@ -7,6 +7,8 @@ import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -46,6 +48,7 @@ public class AddressDialogFragment extends DialogFragment {
 
         return builder.create();
     }
+
 
 
     public interface OnCompleteListener {

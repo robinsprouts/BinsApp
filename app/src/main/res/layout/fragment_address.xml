@@ -13,26 +13,33 @@
         android:layout_height="wrap_content"
         android:id="@+id/layout3">
 
-    <EditText
+    <android.support.design.widget.TextInputLayout
         android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/til"
+        android:layout_weight="0.16">
+
+    <EditText
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="textPostalAddress"
         android:ems="10"
         android:id="@+id/address1"
-        android:contentDescription="address"
         android:autoText="false"
         android:layout_weight="1"
         android:textSize="20sp"
-        android:hint="please enter your address (first line, or number and postcode)"/>
+        android:hint="@string/hinttext"
+        android:contextClickable="false" />
 
+    </android.support.design.widget.TextInputLayout>
 
-    <Button
+        <Button
         style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Lookup"
         android:id="@+id/ok1"
-        android:layout_weight="1" />
+        android:layout_weight="0.35" />
 
     </LinearLayout>
 
