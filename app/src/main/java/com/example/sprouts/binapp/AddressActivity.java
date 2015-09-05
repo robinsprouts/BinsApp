@@ -1,6 +1,5 @@
 package com.example.sprouts.binapp;
 
-import android.app.Activity;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
@@ -10,9 +9,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 
 public class AddressActivity extends AppCompatActivity implements AddressDialogFragment.OnCompleteListener  {
 

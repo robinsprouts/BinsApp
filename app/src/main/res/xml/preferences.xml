@@ -6,5 +6,10 @@
         android:summary="@string/pref_reminder_summ"
         android:defaultValue="true" />
 
+    <Preference
+        android:key="time_pick"
+        android:title="Time"
+        android:summary="Set time" />
+
 
 </PreferenceScreen>

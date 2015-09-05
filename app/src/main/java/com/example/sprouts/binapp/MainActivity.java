@@ -1,39 +1,21 @@
 package com.example.sprouts.binapp;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.os.AsyncTask;
-import android.preference.PreferenceManager;
-import android.support.design.widget.Snackbar;
-import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.text.TextUtils;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.EditText;
-import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.app.*;
+import android.content.*;
+import android.net.*;
+import android.os.*;
+import android.preference.*;
+import android.support.design.widget.*;
+import android.support.v7.app.*;
+import android.text.*;
+import android.view.*;
+import android.widget.*;
+import com.jaunt.*;
+import java.io.*;
+import java.text.*;
+import java.util.*;
 
-import com.jaunt.Element;
-import com.jaunt.Elements;
-import com.jaunt.JauntException;
-import com.jaunt.UserAgent;
-
-import java.io.IOException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
 
 /* TO DO: I need to update the binList each time the address is refreshed (in AddressActivity) *and* in the MainActivity when the app first opens, and at regular intervals using an alarm
 
@@ -49,7 +31,8 @@ public class MainActivity extends AppCompatActivity {
     private String fullAddress;
     private String firstDate;
     private boolean reminder;
-    private int min;
+    private int alarmHour;
+    private int alarmMin;
 
     private AlarmManager alarmMgr;
 
@@ -64,7 +47,14 @@ public class MainActivity extends AppCompatActivity {
         postText = (TextView) findViewById(R.id.textView);
         timeText = (TextView) findViewById(R.id.time);
 
+        Intent myIntent = new Intent(MainActivity.this, MyReceiver.class);
+
+        pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0, myIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+        alarmMgr = (AlarmManager) getSystemService(ALARM_SERVICE);
+
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+
 
     }
 
@@ -80,6 +70,10 @@ public class MainActivity extends AppCompatActivity {
         firstDate = prefs.getString("firstDate", "DEFAULT");
 
         reminder = prefs.getBoolean("pref_reminder", true);
+
+        alarmHour = prefs.getInt("alarmHour", 18);
+
+        alarmMin = prefs.getInt("alarmMin", 0);
 
 
         fullAddress = address;
@@ -142,57 +136,43 @@ public class MainActivity extends AppCompatActivity {
         }
 
         calendar.setTime(alarmDate);
-        calendar.set(Calendar.HOUR_OF_DAY, 23);
-        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.HOUR_OF_DAY, alarmHour);
+        calendar.set(Calendar.MINUTE, alarmMin);
         calendar.set(Calendar.SECOND, 0);
-        calendar.add(Calendar.DAY_OF_MONTH, -1);
+        calendar.add(Calendar.DAY_OF_MONTH, -1); //should be -1
+
+        calendar.set(Calendar.DAY_OF_MONTH, 5);
 
         SimpleDateFormat df1 = new SimpleDateFormat("dd");
+        SimpleDateFormat df2 = new SimpleDateFormat("HH");
+        SimpleDateFormat df3 = new SimpleDateFormat("mm");
 
         String day = df1.format(calendar.getTime());
+        String hour = df2.format(calendar.getTime());
+        String min = df3.format(calendar.getTime());
 
 
-        boolean alarmUp = PendingIntent.getBroadcast(MainActivity.this, 0, new Intent(MainActivity.this, MyReceiver.class), PendingIntent.FLAG_NO_CREATE) != null;
-
+        alarmMgr = (AlarmManager) getSystemService(ALARM_SERVICE);
+        
         if (reminder == true) {
 
-            if (alarmUp) {
-                timeText.setText("Alarm already set for " + day);
-            } else {
+                String alarmTime = "Alarm set for " + day + " at " + hour + " " + min;
 
-                timeText.setText("New alarm set for " + day);
+                Toast toast = Toast.makeText(getApplicationContext(), alarmTime, Toast.LENGTH_SHORT);
 
-                Intent myIntent = new Intent(MainActivity.this, MyReceiver.class);
+                toast.show();
+                alarmMgr.set(AlarmManager.RTC, calendar.getTimeInMillis(), pendingIntent);
 
-                pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0, myIntent, 0);
 
-                alarmMgr = (AlarmManager) getSystemService(ALARM_SERVICE);
-
-                alarmMgr.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
-
-            }
         } else {
-            if (alarmUp) {
-                stopService(new Intent(MainActivity.this, MyReceiver.class));
-                timeText.setText("Alarm stopped");
-            } else {
-                timeText.setText("Alarm not set");
-            }
+                alarmMgr.cancel(pendingIntent);
+
+            String alarmTime = "Alarm cancelled";
+
+            Toast toast = Toast.makeText(getApplicationContext(), alarmTime, Toast.LENGTH_SHORT);
+
+            toast.show();
         }
-    }
-
-    private Date extractDate(String binDate) {
-
-        SimpleDateFormat inputFormat = new SimpleDateFormat("EEEE d MMMM yyyy");
-
-        Date date = new Date();
-        try {
-            date = inputFormat.parse(binDate);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-
-        return date;
     }
 
     private String convertDate(String binDate) {
@@ -321,7 +301,7 @@ public class MainActivity extends AppCompatActivity {
 
                                     if (row ==1) {
                                       firstDate = binText;
-                                    };
+                                    }
 
                                     break;
 

@@ -1,34 +1,14 @@
 package com.example.sprouts.binapp;
 
-import android.app.Fragment;
-import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.os.AsyncTask;
-import android.os.Bundle;
-
-import android.support.design.widget.Snackbar;
-
+import android.app.*;
+import android.os.*;
 import android.support.design.widget.TextInputLayout;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
-
-import com.jaunt.Element;
-import com.jaunt.Elements;
-import com.jaunt.HttpResponse;
-import com.jaunt.JauntException;
-import com.jaunt.ResponseException;
-import com.jaunt.SearchException;
-import com.jaunt.UserAgent;
-
-import java.io.IOException;
-import java.util.ArrayList;
+import android.text.*;
+import android.view.*;
+import android.widget.*;
+import com.jaunt.*;
+import java.io.*;
+import java.util.*;
 
 public class AddressFragment extends Fragment implements AddressDialogFragment.OnCompleteListener {
 
@@ -188,7 +168,7 @@ public class AddressFragment extends Fragment implements AddressDialogFragment.O
             }
             else {
                 errorText = "connection error";
-            };
+            }
             return addressList;
         }
         catch (SearchException e) {
