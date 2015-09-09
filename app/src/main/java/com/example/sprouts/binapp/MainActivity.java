@@ -27,9 +27,10 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String DEBUG_TAG = "Bins";
     private TextView postText;
-    private TextView timeText;
+    private TextView firedText;
     private String fullAddress;
     private String firstDate;
+    private String lastFired;
     private boolean reminder;
     private int alarmHour;
     private int alarmMin;
@@ -45,7 +46,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         postText = (TextView) findViewById(R.id.textView);
-        timeText = (TextView) findViewById(R.id.time);
+
+        firedText = (TextView) findViewById(R.id.textView2);
 
         Intent myIntent = new Intent(MainActivity.this, MyReceiver.class);
 
@@ -55,13 +57,13 @@ public class MainActivity extends AppCompatActivity {
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
+        // setBgdTask(); uncomment then investigate error!
 
     }
 
-
     @Override
-    public void onStart() {
-        super.onStart();
+    public void onResume() {
+        super.onResume();
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -75,10 +77,12 @@ public class MainActivity extends AppCompatActivity {
 
         alarmMin = prefs.getInt("alarmMin", 0);
 
+        lastFired = prefs.getString("last_fired", "blank");
+
+        firedText.setText(lastFired);
+
 
         fullAddress = address;
-
-        postText.setText(address);
 
         if (address.contains(",")) {
 
@@ -112,9 +116,26 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
-        if (firstDate != "DEFAULT") {
+        /* if (firstDate != "DEFAULT") {
             setAlarm(firstDate);
-        }
+        } */
+
+    }
+
+    private void setBgdTask() {
+
+        Calendar calendar = Calendar.getInstance();
+
+        long interval = AlarmManager.INTERVAL_DAY;
+
+
+        Intent myIntent = new Intent(MainActivity.this, BgdReceiver.class);
+
+        pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0, myIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+        alarmMgr = (AlarmManager) getSystemService(ALARM_SERVICE);
+
+        alarmMgr.setRepeating(AlarmManager.RTC, calendar.getTimeInMillis(), interval, pendingIntent);
 
     }
 
@@ -122,10 +143,7 @@ public class MainActivity extends AppCompatActivity {
 
         Calendar calendar = Calendar.getInstance();
 
-        Calendar current = calendar;
-
         SimpleDateFormat inputFormat = new SimpleDateFormat("EEEE d MMMM yyyy");
-
 
         Date alarmDate = null;
 
@@ -141,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
         calendar.set(Calendar.SECOND, 0);
         calendar.add(Calendar.DAY_OF_MONTH, -1); //should be -1
 
-        calendar.set(Calendar.DAY_OF_MONTH, 5);
+        calendar.set(Calendar.DAY_OF_MONTH, 8);
 
         SimpleDateFormat df1 = new SimpleDateFormat("dd");
         SimpleDateFormat df2 = new SimpleDateFormat("HH");
@@ -153,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         alarmMgr = (AlarmManager) getSystemService(ALARM_SERVICE);
-        
+
         if (reminder == true) {
 
                 String alarmTime = "Alarm set for " + day + " at " + hour + " " + min;

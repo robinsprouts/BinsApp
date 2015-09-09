@@ -117,10 +117,6 @@ public class AddressFragment extends Fragment implements AddressDialogFragment.O
         @Override
         protected void onPostExecute(ArrayList arrayList) {
 
-            if (arrayList.size() == 2) {
-                arrayList.remove(0);
-            }
-
             if (errorText != null) {
                 textInputLayout.setError(errorText);
                 errorText = null;

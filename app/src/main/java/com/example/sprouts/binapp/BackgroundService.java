@@ -14,7 +14,10 @@ import com.jaunt.JauntException;
 import com.jaunt.UserAgent;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 
 public class BackgroundService extends JobService {
@@ -141,10 +144,18 @@ public class BackgroundService extends JobService {
 
             String joined = TextUtils.join(";", arrayList);
 
+            String last;
+
+
+            SimpleDateFormat formatDate = new SimpleDateFormat("EEEE d MMMM yyyy HH:mm:SS");
+
+            last = formatDate.format(new Date());
+
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(BackgroundService.this);
 
             final SharedPreferences.Editor edit = prefs.edit();
             edit.putString("bins", joined);
+            edit.putString("last_fired", last);
             edit.commit();
 
         }

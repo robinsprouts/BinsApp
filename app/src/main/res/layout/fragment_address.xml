@@ -8,13 +8,22 @@
 
 
     <LinearLayout
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/layout3">
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/instructions"
+            android:text="Please enter the first line of your address or your postcode and choose from the list."
+            android:textSize="@dimen/abc_text_size_display_1_material"
+            android:layout_marginTop="@dimen/abc_text_size_large_material"
+            android:layout_marginBottom="@dimen/abc_text_size_large_material" />
+
     <android.support.design.widget.TextInputLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/til"
         android:layout_weight="0.16">
@@ -33,13 +42,12 @@
 
     </android.support.design.widget.TextInputLayout>
 
-        <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Lookup"
+    <Button
+    style="?android:attr/buttonStyleSmall"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
         android:id="@+id/ok1"
-        android:layout_weight="0.35" />
+        android:text="Look Up" />
 
     </LinearLayout>
 

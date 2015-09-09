@@ -30,6 +30,12 @@ public class MyService extends Service {
 
         Log.v("SIMPLESERVICE", "onCreate");
 
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        super.onStartCommand(intent, flags, startId);
+
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         String binString = prefs.getString("bins", "DEFAULT");
@@ -42,12 +48,6 @@ public class MyService extends Service {
 
         showNotification();
 
-    }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        super.onStartCommand(intent, flags, startId);
-
         Log.v("SIMPLESERVICE", "onStartCommand");
         return START_NOT_STICKY;
     }
@@ -58,7 +58,7 @@ public class MyService extends Service {
         // TODO Auto-generated method stub
         super.onDestroy();
 
-        Log.v("SIMPLESERVICE", "onStartCommand");
+        Log.v("SIMPLESERVICE", "onDestroy");
     }
 
     public void showNotification() {
@@ -74,7 +74,7 @@ public class MyService extends Service {
                 .setContentText(bin)
                 .setShowWhen(true)
                 .setContentIntent(launchIntent)
-                .setVibrate(new long[] {500, 500, 500, 500, 500})
+                .setVibrate(new long[] {500,500})
                 .build();
 
         NotificationManager mNot = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);

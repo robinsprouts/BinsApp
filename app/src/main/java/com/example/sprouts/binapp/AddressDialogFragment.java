@@ -29,11 +29,27 @@ public class AddressDialogFragment extends DialogFragment {
 
         Bundle bundle = getArguments();
         arrayList = bundle.getStringArrayList("list");
+
+        String numString = arrayList.get(0).toString();
+        String[] numStrings = numString.split(" ");
+
+        numString = numStrings[3];
+
+        arrayList.remove(0);
+
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter(getActivity(), android.R.layout.simple_list_item_1, arrayList);
 
 
+        String title;
+
+        if (numString.equals("1")) {
+            title = "Choose your address";
+        } else {
+            title = "Choose from " + numString + " addresses";
+        }
+
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle(R.string.dialog_title)
+        builder.setTitle(title)
                 .setAdapter(arrayAdapter, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
 
