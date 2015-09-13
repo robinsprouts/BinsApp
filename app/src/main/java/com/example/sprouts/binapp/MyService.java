@@ -8,13 +8,17 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 import android.util.Log;
+
+import java.lang.reflect.Array;
 
 public class MyService extends Service {
 
     private NotificationManager mManager;
     private String bin;
+    private int col;
 
     public MyService() {
     }
@@ -44,9 +48,17 @@ public class MyService extends Service {
 
             String[] bins = TextUtils.split(binString, ";");
             bin = bins[1];
+
+            if (bin.contains("General")) {
+                col = 0xFF888888; // grey
+            } else {
+                col = 0xFF00AA00; // green
+            }
+
+
         }
 
-        showNotification();
+        showNotification(col);
 
         Log.v("SIMPLESERVICE", "onStartCommand");
         return START_NOT_STICKY;
@@ -58,27 +70,34 @@ public class MyService extends Service {
         // TODO Auto-generated method stub
         super.onDestroy();
 
-        Log.v("SIMPLESERVICE", "onDestroy");
+        Log.v("MyService", "onDestroy");
     }
 
-    public void showNotification() {
+    public void showNotification(int col) {
 
         PendingIntent launchIntent = PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), 0);
 
-        int mNotificationId = 001;
+        int mNotificationId = 002;
 
-        Notification notify = new Notification.Builder(this)
+        Notification.BigTextStyle big = new Notification.BigTextStyle();
+
+        big.setSummaryText("summary")
+                .setBigContentTitle("Bin day tomorrow")
+                .bigText(bin);
+
+        Notification.Builder builder = new Notification.Builder(this);
+
+        builder.setStyle(big)
                 .setSmallIcon(R.drawable.ic_stat_bin_notification)
-                .setColor(0xFF00AA00)
+                .setColor(col)
                 .setContentTitle("Bin day tomorrow")
                 .setContentText(bin)
                 .setShowWhen(true)
                 .setContentIntent(launchIntent)
-                .setVibrate(new long[] {500,500})
-                .build();
+                .setVibrate(new long[]{500, 500});
 
         NotificationManager mNot = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
-        mNot.notify(mNotificationId, notify);
+        mNot.notify(mNotificationId, builder.build());
     }
 }

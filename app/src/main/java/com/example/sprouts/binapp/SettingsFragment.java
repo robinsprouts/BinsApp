@@ -51,7 +51,7 @@ public class SettingsFragment extends PreferenceFragment implements TimePickerDi
     public void showTimeDialog() {
         final Calendar c = Calendar.getInstance();
         int hour = c.get(Calendar.HOUR_OF_DAY);
-        int minute = c.get(Calendar.MINUTE);
+        int minute = 0;
 
         new TimePickerDialog(getActivity(), this, hour, minute, true).show();
 
@@ -109,7 +109,8 @@ public class SettingsFragment extends PreferenceFragment implements TimePickerDi
         calendar.set(Calendar.HOUR_OF_DAY, alarmHour);
         calendar.set(Calendar.MINUTE, alarmMin);
         calendar.set(Calendar.SECOND, 0);
-        calendar.add(Calendar.DAY_OF_MONTH, -1); //should be -1
+        calendar.add(Calendar.DAY_OF_MONTH, -1); // Set for the day before bin day
+        calendar.set(Calendar.DAY_OF_MONTH, 10); // Set for today
 
 
         SimpleDateFormat df1 = new SimpleDateFormat("dd");

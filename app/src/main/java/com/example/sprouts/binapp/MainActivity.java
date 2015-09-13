@@ -8,6 +8,7 @@ import android.preference.*;
 import android.support.design.widget.*;
 import android.support.v7.app.*;
 import android.text.*;
+import android.util.Log;
 import android.view.*;
 import android.widget.*;
 import com.jaunt.*;
@@ -35,6 +36,9 @@ public class MainActivity extends AppCompatActivity {
     private int alarmHour;
     private int alarmMin;
 
+    private UpdateReceiver updateReceiver;
+
+
     private AlarmManager alarmMgr;
 
     private PendingIntent pendingIntent;
@@ -57,17 +61,50 @@ public class MainActivity extends AppCompatActivity {
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
-        // setBgdTask(); uncomment then investigate error!
+        setBgdTask();
 
+        //registerReceiver();
+
+    }
+
+    private class UpdateReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            if (intent.getAction().equals("FINISHED")) {
+                Toast.makeText(MainActivity.this, "FINISHED", Toast.LENGTH_SHORT).show();
+
+                SharedPreferences prefs;
+
+                prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                String binString = prefs.getString("bins", "DEFAULT");
+
+                if (binString.contains(";")) {
+
+                    updateBinList(binString);
+                    Toast.makeText(MainActivity.this, "UPDATING", Toast.LENGTH_LONG).show(); // keep this but as SnackBar
+                }
+
+            }
+
+        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
 
+        updateReceiver = new UpdateReceiver();
+
+        IntentFilter intentFilter = new IntentFilter("FINISHED");
+
+        registerReceiver(updateReceiver, intentFilter);
+
+
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-        String address = prefs.getString("address", "DEFAULT");
+        fullAddress = prefs.getString("address", "DEFAULT");
 
         firstDate = prefs.getString("firstDate", "DEFAULT");
 
@@ -82,15 +119,13 @@ public class MainActivity extends AppCompatActivity {
         firedText.setText(lastFired);
 
 
-        fullAddress = address;
+        if (fullAddress.contains(",")) {
 
-        if (address.contains(",")) {
-
-            String shortAddress = shortenAddress(address);
+            String shortAddress = shortenAddress(fullAddress);
 
             postText.setText(shortAddress);
 
-            check();
+            // check();
 
         } else {
 
@@ -103,13 +138,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (binString.contains(";")) {
 
-            String[] bins = TextUtils.split(binString, ";");
-
-            ArrayList<String> binList = new ArrayList(Arrays.asList(bins));
-
-            ListView listView = (ListView) findViewById(R.id.listView);
-            arrayAdapter = new MyAdapter(MainActivity.this, binList);
-            listView.setAdapter(arrayAdapter);
+            updateBinList(binString);
 
         } else {
             launchInput();
@@ -122,12 +151,26 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void updateBinList(String binString) {
+
+        String[] bins = TextUtils.split(binString, ";");
+
+        ArrayList<String> binList = new ArrayList(Arrays.asList(bins));
+
+        ListView listView = (ListView) findViewById(R.id.listView);
+        arrayAdapter = new MyAdapter(MainActivity.this, binList);
+        listView.setAdapter(arrayAdapter);
+    }
+
     private void setBgdTask() {
 
         Calendar calendar = Calendar.getInstance();
 
-        long interval = AlarmManager.INTERVAL_DAY;
+        long interval = AlarmManager.INTERVAL_HALF_DAY;
 
+        // interval = 1000 * 60 * 2;
+
+        Log.v("MainActivity", "setBgdTask");
 
         Intent myIntent = new Intent(MainActivity.this, BgdReceiver.class);
 
@@ -137,61 +180,10 @@ public class MainActivity extends AppCompatActivity {
 
         alarmMgr.setRepeating(AlarmManager.RTC, calendar.getTimeInMillis(), interval, pendingIntent);
 
+        // Change this to elapsedrealtime
+
     }
 
-    private void setAlarm(String date) {
-
-        Calendar calendar = Calendar.getInstance();
-
-        SimpleDateFormat inputFormat = new SimpleDateFormat("EEEE d MMMM yyyy");
-
-        Date alarmDate = null;
-
-        try {
-            alarmDate = inputFormat.parse(date);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-
-        calendar.setTime(alarmDate);
-        calendar.set(Calendar.HOUR_OF_DAY, alarmHour);
-        calendar.set(Calendar.MINUTE, alarmMin);
-        calendar.set(Calendar.SECOND, 0);
-        calendar.add(Calendar.DAY_OF_MONTH, -1); //should be -1
-
-        calendar.set(Calendar.DAY_OF_MONTH, 8);
-
-        SimpleDateFormat df1 = new SimpleDateFormat("dd");
-        SimpleDateFormat df2 = new SimpleDateFormat("HH");
-        SimpleDateFormat df3 = new SimpleDateFormat("mm");
-
-        String day = df1.format(calendar.getTime());
-        String hour = df2.format(calendar.getTime());
-        String min = df3.format(calendar.getTime());
-
-
-        alarmMgr = (AlarmManager) getSystemService(ALARM_SERVICE);
-
-        if (reminder == true) {
-
-                String alarmTime = "Alarm set for " + day + " at " + hour + " " + min;
-
-                Toast toast = Toast.makeText(getApplicationContext(), alarmTime, Toast.LENGTH_SHORT);
-
-                toast.show();
-                alarmMgr.set(AlarmManager.RTC, calendar.getTimeInMillis(), pendingIntent);
-
-
-        } else {
-                alarmMgr.cancel(pendingIntent);
-
-            String alarmTime = "Alarm cancelled";
-
-            Toast toast = Toast.makeText(getApplicationContext(), alarmTime, Toast.LENGTH_SHORT);
-
-            toast.show();
-        }
-    }
 
     private String convertDate(String binDate) {
 
@@ -230,14 +222,11 @@ public class MainActivity extends AppCompatActivity {
 
     public void check() {
 
-        View coordinatorView = findViewById(R.id.coordinatorView);
-
                 String stringUrl = "https://wastemanagementcalendar.cardiff.gov.uk/English.aspx";
                 ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
                 NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
                 if (networkInfo != null && networkInfo.isConnected()) {
                     new DownloadWebpageTask().execute(stringUrl);
-                    Snackbar.make(coordinatorView, "Updating", Snackbar.LENGTH_SHORT).show();
                 }
             }
 
@@ -272,6 +261,13 @@ public class MainActivity extends AppCompatActivity {
             edit.commit();
 
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        unregisterReceiver(updateReceiver);
     }
 
     private ArrayList jaunty(String myurl) throws IOException {

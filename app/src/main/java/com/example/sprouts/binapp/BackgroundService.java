@@ -1,11 +1,18 @@
 package com.example.sprouts.binapp;
 
+import android.app.Service;
 import android.app.job.JobParameters;
 import android.app.job.JobService;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Looper;
 import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.jaunt.Element;
@@ -20,30 +27,50 @@ import java.util.Calendar;
 import java.util.Date;
 
 
-public class BackgroundService extends JobService {
+public class BackgroundService extends Service {
 
-    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
     String fullAddress;
+    String stringUrl;
 
     @Override
-    public boolean onStartJob(JobParameters params) {
+    public void onCreate() {
+        super.onCreate();
 
-        String stringUrl = "https://wastemanagementcalendar.cardiff.gov.uk/English.aspx";
-        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+        Log.v("BGSERVICE", "onCreate");
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        super.onStartCommand(intent, flags, startId);
+
+        /*
+        stringUrl = "https://wastemanagementcalendar.cardiff.gov.uk/English.aspx";
         String address = prefs.getString("address", "DEFAULT");
 
         fullAddress = address;
 
         new DownloadWebpageTask().execute(stringUrl);
 
-        return true;
+        Log.v("BGSERVICE", "onStart");
+
+        */
+
+        return START_NOT_STICKY;
     }
 
-    @Override
-    public boolean onStopJob(JobParameters params) {
 
-        return false;
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
     }
 
 
