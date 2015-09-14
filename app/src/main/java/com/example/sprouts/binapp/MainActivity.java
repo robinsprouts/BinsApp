@@ -172,6 +172,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+
     private void setBgdTask() {
 
         long interval = AlarmManager.INTERVAL_FIFTEEN_MINUTES;
