@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
@@ -17,26 +18,23 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.prefs.Preferences;
 
 public class SettingsFragment extends PreferenceFragment implements TimePickerDialog.OnTimeSetListener {
 
     private String firstDate;
     private boolean reminder;
+    private int hourPref;
 
     private PendingIntent pendingIntent;
     private AlarmManager alarmMgr;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         addPreferencesFromResource(R.xml.preferences);
-
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        final SharedPreferences.Editor edit = preferences.edit();
-
-
-        // CheckBoxPreference checkBoxPreference = (CheckBoxPreference) findPreference();
 
         Preference timePref = findPreference("time_pick");
         timePref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
@@ -49,13 +47,16 @@ public class SettingsFragment extends PreferenceFragment implements TimePickerDi
     }
 
     public void showTimeDialog() {
-        final Calendar c = Calendar.getInstance();
-        int hour = c.get(Calendar.HOUR_OF_DAY);
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        hourPref = preferences.getInt("alarmHour", 18);
+
+        int hour = hourPref;
         int minute = 0;
 
         new TimePickerDialog(getActivity(), this, hour, minute, true).show();
 
     }
+
 
     @Override
     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
@@ -66,6 +67,13 @@ public class SettingsFragment extends PreferenceFragment implements TimePickerDi
         edit.putInt("alarmHour", hourOfDay);
         edit.putInt("alarmMin", minute);
         edit.commit();
+
+        Intent updateIntent = new Intent(getActivity(), BgService.class);
+
+        Log.v("SettingsFragment", "runIntent");
+
+        getActivity().startService(updateIntent);
+
 
         firstDate = preferences.getString("firstDate", "DEFAULT");
         reminder = preferences.getBoolean("pref_reminder", true);
@@ -78,15 +86,15 @@ public class SettingsFragment extends PreferenceFragment implements TimePickerDi
 
         if ((firstDate != "DEFAULT") && (reminder == true) ) {
             setAlarm(firstDate, hourOfDay, minute);
+            Log.v("ALARM", "SET");
+
         } else {
             alarmMgr.cancel(pendingIntent);
 
-            String alarmTime = "Alarm not set";
-
-            Toast toast = Toast.makeText(getActivity(), alarmTime, Toast.LENGTH_SHORT);
-
-            toast.show();
+            Log.v("ALARM", "NOT SET");
         }
+
+
 
     }
 
@@ -110,23 +118,16 @@ public class SettingsFragment extends PreferenceFragment implements TimePickerDi
         calendar.set(Calendar.MINUTE, alarmMin);
         calendar.set(Calendar.SECOND, 0);
         calendar.add(Calendar.DAY_OF_MONTH, -1); // Set for the day before bin day
-        calendar.set(Calendar.DAY_OF_MONTH, 10); // Set for today
 
+        SimpleDateFormat fDate = new SimpleDateFormat("EEEE d MMMM");
+        SimpleDateFormat fTime = new SimpleDateFormat("HH:mm");
 
-        SimpleDateFormat df1 = new SimpleDateFormat("dd");
-        SimpleDateFormat df2 = new SimpleDateFormat("HH");
-        SimpleDateFormat df3 = new SimpleDateFormat("mm");
+        String alarmTime = fDate.format(calendar.getTime()) + " at " + fTime.format(calendar.getTime());
 
-        String day = df1.format(calendar.getTime());
-        String hour = df2.format(calendar.getTime());
-        String min = df3.format(calendar.getTime());
-
-        String alarmTime = "Alarm set for " + day + " at " + hour + " " + min;
-
-        Toast toast = Toast.makeText(getActivity(), alarmTime, Toast.LENGTH_SHORT);
-
-        toast.show();
         alarmMgr.set(AlarmManager.RTC, calendar.getTimeInMillis(), pendingIntent);
 
+        Preference timePref = findPreference("time_pick");
+
+        timePref.setSummary(alarmTime);
     }
 }

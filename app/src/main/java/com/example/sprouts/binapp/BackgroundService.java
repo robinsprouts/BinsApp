@@ -1,14 +1,10 @@
 package com.example.sprouts.binapp;
 
 import android.app.Service;
-import android.app.job.JobParameters;
-import android.app.job.JobService;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
@@ -23,7 +19,6 @@ import com.jaunt.UserAgent;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 
 

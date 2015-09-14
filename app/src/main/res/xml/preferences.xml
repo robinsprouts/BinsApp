@@ -8,17 +8,7 @@
 
     <Preference
         android:key="time_pick"
-        android:title="Time"
+        android:title="Reminder Time"
         android:summary="Set time"/>
-
-
-    <!--
-    <com.example.sprouts.binapp.util.MyPreference
-        android:key="mypref"
-        android:title="My Title"
-        android:summary="My Text"
-        />
-
--->
 
 </PreferenceScreen>

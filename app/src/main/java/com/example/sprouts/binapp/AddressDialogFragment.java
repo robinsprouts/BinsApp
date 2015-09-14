@@ -30,7 +30,7 @@ public class AddressDialogFragment extends DialogFragment {
         Bundle bundle = getArguments();
         arrayList = bundle.getStringArrayList("list");
 
-        String numString = arrayList.get(0).toString();
+        String numString = arrayList.get(0);
         String[] numStrings = numString.split(" ");
 
         numString = numStrings[3];

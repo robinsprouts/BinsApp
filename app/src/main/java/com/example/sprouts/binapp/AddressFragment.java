@@ -20,8 +20,6 @@ public class AddressFragment extends Fragment implements AddressDialogFragment.O
 
     private Button button;
 
-    private TextView counter;
-
     public static AddressFragment newInstance(String param1, String param2) {
 
         AddressFragment fragment = new AddressFragment();
@@ -59,9 +57,6 @@ public class AddressFragment extends Fragment implements AddressDialogFragment.O
 
         textInputLayout = (TextInputLayout) view.findViewById(R.id.til);
         textInputLayout.setErrorEnabled(true);
-
-        // counter = (TextView) view.findViewById(R.id.updatebox);
-
 
         button.setEnabled(false);
 

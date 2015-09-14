@@ -51,8 +51,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         postText = (TextView) findViewById(R.id.textView);
 
-        firedText = (TextView) findViewById(R.id.textView2);
-
         Intent myIntent = new Intent(MainActivity.this, MyReceiver.class);
 
         pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0, myIntent, PendingIntent.FLAG_CANCEL_CURRENT);
@@ -61,10 +59,6 @@ public class MainActivity extends AppCompatActivity {
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
-        setBgdTask();
-
-        //registerReceiver();
-
     }
 
     private class UpdateReceiver extends BroadcastReceiver {
@@ -72,8 +66,21 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
 
+             final CoordinatorLayout coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatorView);
+
             if (intent.getAction().equals("FINISHED")) {
-                Toast.makeText(MainActivity.this, "FINISHED", Toast.LENGTH_SHORT).show();
+
+                Bundle extras = intent.getExtras();
+
+                String error = extras.getString("error");
+
+                if (error != null) {
+                    Snackbar.make(coordinatorLayout, error, Snackbar.LENGTH_SHORT).show();
+                } else
+
+                {
+                    Snackbar.make(coordinatorLayout, "Updated", Snackbar.LENGTH_SHORT).show();
+                }
 
                 SharedPreferences prefs;
 
@@ -83,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
                 if (binString.contains(";")) {
 
                     updateBinList(binString);
-                    Toast.makeText(MainActivity.this, "UPDATING", Toast.LENGTH_LONG).show(); // keep this but as SnackBar
+                    // Toast.makeText(MainActivity.this, "UPDATING", Toast.LENGTH_LONG).show(); // keep this but as SnackBar
                 }
 
             }
@@ -101,7 +108,6 @@ public class MainActivity extends AppCompatActivity {
 
         registerReceiver(updateReceiver, intentFilter);
 
-
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         fullAddress = prefs.getString("address", "DEFAULT");
@@ -116,8 +122,6 @@ public class MainActivity extends AppCompatActivity {
 
         lastFired = prefs.getString("last_fired", "blank");
 
-        firedText.setText(lastFired);
-
 
         if (fullAddress.contains(",")) {
 
@@ -125,7 +129,8 @@ public class MainActivity extends AppCompatActivity {
 
             postText.setText(shortAddress);
 
-            // check();
+            launchIntent();
+            setBgdTask();
 
         } else {
 
@@ -145,10 +150,6 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
-        /* if (firstDate != "DEFAULT") {
-            setAlarm(firstDate);
-        } */
-
     }
 
     private void updateBinList(String binString) {
@@ -162,13 +163,18 @@ public class MainActivity extends AppCompatActivity {
         listView.setAdapter(arrayAdapter);
     }
 
+    private void launchIntent() {
+        Intent updateIntent = new Intent(this, BgService.class);
+
+        Log.v("SettingsFragment", "runIntent");
+
+        this.startService(updateIntent);
+
+    }
+
     private void setBgdTask() {
 
-        Calendar calendar = Calendar.getInstance();
-
-        long interval = AlarmManager.INTERVAL_HALF_DAY;
-
-        // interval = 1000 * 60 * 2;
+        long interval = AlarmManager.INTERVAL_FIFTEEN_MINUTES;
 
         Log.v("MainActivity", "setBgdTask");
 
@@ -178,7 +184,7 @@ public class MainActivity extends AppCompatActivity {
 
         alarmMgr = (AlarmManager) getSystemService(ALARM_SERVICE);
 
-        alarmMgr.setRepeating(AlarmManager.RTC, calendar.getTimeInMillis(), interval, pendingIntent);
+        alarmMgr.setRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + interval, interval, pendingIntent);
 
         // Change this to elapsedrealtime
 
