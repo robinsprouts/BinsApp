@@ -17,9 +17,11 @@ import com.jaunt.ResponseException;
 import com.jaunt.UserAgent;
 
 import java.io.IOException;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 
 public class BgService extends Service {
@@ -28,7 +30,7 @@ public class BgService extends Service {
 
     private String fullAddress;
     private String firstDate;
-    private String errorText;
+    private String errorText = "Updated";
 
     @Override
     public IBinder onBind(Intent intent) {return null;}
@@ -80,6 +82,7 @@ public class BgService extends Service {
 
 
             ArrayList<String> a = new ArrayList();
+            a.add(0, "error");
 
             try {
                 return jaunty(urls[0]);
@@ -92,19 +95,45 @@ public class BgService extends Service {
         @Override
         protected void onPostExecute(ArrayList arrayList) {
 
-          String bin = TextUtils.join(";", arrayList);
-
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(BgService.this);
-
-            final SharedPreferences.Editor edit = prefs.edit();
-            edit.putString("bins", bin);
-            edit.putString("firstDate", firstDate);
-            edit.commit();
-
-            broadcast();
+                putList(arrayList);
+                broadcast();
         }
 
     }
+
+    private void putList(ArrayList arrayList) {
+
+        String bin = TextUtils.join(";", arrayList);
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(BgService.this);
+
+        final SharedPreferences.Editor edit = prefs.edit();
+
+        String logText = prefs.getString("logText", "Empty Log");
+
+        Calendar cal = Calendar.getInstance();
+
+        SimpleDateFormat outputFormat = new SimpleDateFormat("HH:mm:SS");
+
+        String timeStamp = outputFormat.format(cal);
+
+        if (errorText.equals("Updated")) {
+            logText = logText + "\n" + "Update successful " + timeStamp;
+        }
+        else {
+            logText = logText + "\n" + errorText + " " + timeStamp;
+        }
+
+        edit.putString("logText", logText);
+
+        if (arrayList.get(0) != "error") {
+            edit.putString("bins", bin);
+            edit.putString("firstDate", firstDate);
+        }
+
+        edit.commit();
+    }
+
     private ArrayList jaunty(String myurl) throws IOException {
 
 

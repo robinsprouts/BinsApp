@@ -74,13 +74,7 @@ public class MainActivity extends AppCompatActivity {
 
                 String error = extras.getString("error");
 
-                if (error != null) {
-                    Snackbar.make(coordinatorLayout, error, Snackbar.LENGTH_SHORT).show();
-                } else
-
-                {
-                    Snackbar.make(coordinatorLayout, "Updated", Snackbar.LENGTH_SHORT).show();
-                }
+                Snackbar.make(coordinatorLayout, error, Snackbar.LENGTH_SHORT).show();
 
                 SharedPreferences prefs;
 
@@ -172,8 +166,9 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-
     private void setBgdTask() {
+
+        // do i need to do this in other activity?
 
         long interval = AlarmManager.INTERVAL_FIFTEEN_MINUTES;
 
@@ -186,8 +181,6 @@ public class MainActivity extends AppCompatActivity {
         alarmMgr = (AlarmManager) getSystemService(ALARM_SERVICE);
 
         alarmMgr.setRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + interval, interval, pendingIntent);
-
-        // Change this to elapsedrealtime
 
     }
 
@@ -227,49 +220,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void check() {
-
-                String stringUrl = "https://wastemanagementcalendar.cardiff.gov.uk/English.aspx";
-                ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-                NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-                if (networkInfo != null && networkInfo.isConnected()) {
-                    new DownloadWebpageTask().execute(stringUrl);
-                }
-            }
-
-    private class DownloadWebpageTask extends AsyncTask<String, Void, ArrayList> {
-
-        @Override
-        protected ArrayList doInBackground(String... urls) {
-
-
-            ArrayList<String> a = new ArrayList();
-
-            try {
-                return jaunty(urls[0]);
-            } catch (IOException e) {
-                Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
-                return a;
-            }
-        }
-
-
-        @Override
-        protected void onPostExecute(ArrayList arrayList) {
-
-
-            String joined = TextUtils.join(";", arrayList);
-
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-
-            final SharedPreferences.Editor edit = prefs.edit();
-            edit.putString("bins", joined);
-            edit.putString("firstDate", firstDate);
-            edit.commit();
-
-        }
-    }
-
     @Override
     protected void onPause() {
         super.onPause();
@@ -277,85 +227,6 @@ public class MainActivity extends AppCompatActivity {
         unregisterReceiver(updateReceiver);
     }
 
-    private ArrayList jaunty(String myurl) throws IOException {
-
-
-        String[] bins = new String[2];
-
-        ArrayList binArray = new ArrayList();
-
-        try {
-            UserAgent userAgent = new UserAgent();
-            userAgent.visit(myurl);
-
-            userAgent.doc.apply(fullAddress);
-            userAgent.doc.submit("Search");
-
-
-            Elements trs = userAgent.doc.findFirst("<table class = border>").findEvery("<tr>");
-
-            int row = 0;
-
-            for (Element tr : trs) {
-
-                    Elements tds = tr.findEach("<td class = border>");
-
-                    int col = 0;
-                    bins[1] = "";
-
-                    for (Element td : tds) {
-
-                        String binText = td.findFirst("<center>").innerText(" ", false, false);
-
-
-                        if (row == 0) {
-                            continue;
-                        } else {
-
-                            switch (col)
-                            {
-                                case 0:
-
-                                    binText = convertDate(binText);
-
-                                    bins[0] = binText;
-
-                                    if (row ==1) {
-                                      firstDate = binText;
-                                    }
-
-                                    break;
-
-                                case 1:
-                                case 2:
-                                    bins[1] += binText + "\n";
-                                    break;
-
-                                case 3:
-                                    bins[1] += binText;
-                                    break;
-                            }
-
-                            col += 1;
-                        }
-                    }
-                row += 1;
-                binArray.add(bins[0]);
-                binArray.add(bins[1]);
-            }
-
-            binArray.remove(0);
-            binArray.remove(0);
-
-            return binArray;
-
-        } catch (JauntException e) {
-            System.err.println(e);
-            return binArray;
-        }
-
-
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -382,6 +253,11 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
 
+        if (id == R.id.action_info) {
+            launchInfo();
+            return true;
+        }
+
         return super.onOptionsItemSelected(item);
     }
 
@@ -395,6 +271,11 @@ public class MainActivity extends AppCompatActivity {
     public void launchInput() {
 
         Intent intent = new Intent(this, AddressActivity.class);
+        startActivity(intent);
+    }
+
+    public void launchInfo() {
+        Intent intent = new Intent(this, InfoActivity.class);
         startActivity(intent);
     }
 

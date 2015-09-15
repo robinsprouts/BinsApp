@@ -25,6 +25,7 @@ public class SettingsFragment extends PreferenceFragment implements TimePickerDi
     private String firstDate;
     private boolean reminder;
     private int hourPref;
+    private int minPref;
 
     private PendingIntent pendingIntent;
     private AlarmManager alarmMgr;
@@ -36,22 +37,28 @@ public class SettingsFragment extends PreferenceFragment implements TimePickerDi
 
         addPreferencesFromResource(R.xml.preferences);
 
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+
         Preference timePref = findPreference("time_pick");
+        firstDate = preferences.getString("firstDate", "DEFAULT");
+        hourPref = preferences.getInt("alarmHour", 18);
+        minPref = preferences.getInt("alarmMin", 0);
+
+
+        Calendar calendar = setCalendar(firstDate, hourPref, minPref);
+
+        setSummary(calendar);
+
         timePref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                showTimeDialog();
+                showTimeDialog(hourPref, minPref);
                 return false;
             }
         });
     }
 
-    public void showTimeDialog() {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        hourPref = preferences.getInt("alarmHour", 18);
-
-        int hour = hourPref;
-        int minute = 0;
+    public void showTimeDialog(int hour, int minute) {
 
         new TimePickerDialog(getActivity(), this, hour, minute, true).show();
 
@@ -84,7 +91,7 @@ public class SettingsFragment extends PreferenceFragment implements TimePickerDi
         alarmMgr = (AlarmManager) getActivity().getSystemService(Context.ALARM_SERVICE);
 
 
-        if ((firstDate != "DEFAULT") && (reminder == true) ) {
+        if ((firstDate != "DEFAULT") && (reminder == true)) {
             setAlarm(firstDate, hourOfDay, minute);
             Log.v("ALARM", "SET");
 
@@ -95,12 +102,30 @@ public class SettingsFragment extends PreferenceFragment implements TimePickerDi
         }
 
 
-
     }
 
 
     private void setAlarm(String date, int alarmHour, int alarmMin) {
 
+        Calendar calendar = setCalendar(date, alarmHour, alarmMin);
+
+        alarmMgr.set(AlarmManager.RTC, calendar.getTimeInMillis(), pendingIntent);
+
+        setSummary(calendar);
+    }
+
+    private void setSummary(Calendar calendar) {
+
+        SimpleDateFormat fDate = new SimpleDateFormat("EEEE d MMMM");
+        SimpleDateFormat fTime = new SimpleDateFormat("HH:mm");
+
+        String alarmTime = fDate.format(calendar.getTime()) + " at " + fTime.format(calendar.getTime());
+        Preference timePref = findPreference("time_pick");
+
+        timePref.setSummary(alarmTime);
+    }
+
+    private Calendar setCalendar(String date, int alarmHour, int alarmMin) {
         Calendar calendar = Calendar.getInstance();
 
         SimpleDateFormat inputFormat = new SimpleDateFormat("EEEE d MMMM yyyy");
@@ -119,15 +144,7 @@ public class SettingsFragment extends PreferenceFragment implements TimePickerDi
         calendar.set(Calendar.SECOND, 0);
         calendar.add(Calendar.DAY_OF_MONTH, -1); // Set for the day before bin day
 
-        SimpleDateFormat fDate = new SimpleDateFormat("EEEE d MMMM");
-        SimpleDateFormat fTime = new SimpleDateFormat("HH:mm");
-
-        String alarmTime = fDate.format(calendar.getTime()) + " at " + fTime.format(calendar.getTime());
-
-        alarmMgr.set(AlarmManager.RTC, calendar.getTimeInMillis(), pendingIntent);
-
-        Preference timePref = findPreference("time_pick");
-
-        timePref.setSummary(alarmTime);
+        return calendar;
     }
+
 }
