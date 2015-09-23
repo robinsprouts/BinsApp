@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.IBinder;
+import android.preference.Preference;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -17,7 +18,6 @@ import com.jaunt.ResponseException;
 import com.jaunt.UserAgent;
 
 import java.io.IOException;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -30,6 +30,7 @@ public class BgService extends Service {
 
     private String fullAddress;
     private String firstDate;
+    private String secondDate;
     private String errorText = "Updated";
 
     @Override
@@ -49,10 +50,53 @@ public class BgService extends Service {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         fullAddress = prefs.getString("address", "DEFAULT");
+        firstDate = prefs.getString("firstDate", "DEFAULT");
+
+        Log.v("BGSERVICE", firstDate);
+
+        /*
+        if (checkDate(firstDate)) {
+        check();}
+        else {
+            errorText = "date not reached";
+            broadcast();
+        }
+        */
 
         check();
 
         return START_NOT_STICKY;
+    }
+
+    private boolean checkDate(String date) {
+
+        Log.v("BGSERVICE", "Check Date");
+
+        SimpleDateFormat inputFormat = new SimpleDateFormat("EEEE d MMMM yyyy");
+
+        Date firstDate = null;
+        Date todayDate;
+
+        try {
+            firstDate = inputFormat.parse(date);
+
+        } catch (ParseException e) {
+            e.printStackTrace();
+
+        }
+
+        Calendar cal = Calendar.getInstance();
+        todayDate = cal.getTime();
+
+
+        if (todayDate.before(firstDate)) {
+            Log.v("BGSERVICE", "before");
+            return false;
+        } else {
+            Log.v("BGSERVICE", "after");
+            return true;
+        }
+
     }
 
     private void broadcast() {
@@ -115,7 +159,7 @@ public class BgService extends Service {
 
         SimpleDateFormat outputFormat = new SimpleDateFormat("HH:mm:SS");
 
-        String timeStamp = outputFormat.format(cal);
+        String timeStamp = outputFormat.format(cal.getTime());
 
         if (errorText.equals("Updated")) {
             logText = logText + "\n" + "Update successful " + timeStamp;
@@ -126,9 +170,11 @@ public class BgService extends Service {
 
         edit.putString("logText", logText);
 
-        if (arrayList.get(0) != "error") {
+        if (arrayList.get(0).toString().contains("Error")) {
+        } else {
             edit.putString("bins", bin);
             edit.putString("firstDate", firstDate);
+            edit.putString("secondDate", secondDate);
         }
 
         edit.commit();
@@ -180,6 +226,10 @@ public class BgService extends Service {
                                     firstDate = binText;
                                 }
 
+                                if (row == 2) {
+                                    secondDate = binText;
+                                }
+
                                 break;
 
                             case 1:
@@ -215,10 +265,12 @@ public class BgService extends Service {
                 else {
                     errorText = "Connection Error";
                 }
+            binArray.add(0, errorText);
                 return binArray;
 
         } catch (JauntException e) {
             System.err.println(e);
+            binArray.add(0, "Error");
             return binArray;
         }
 

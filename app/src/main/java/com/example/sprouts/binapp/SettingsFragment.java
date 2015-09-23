@@ -12,17 +12,16 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.TimePicker;
-import android.widget.Toast;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.prefs.Preferences;
 
 public class SettingsFragment extends PreferenceFragment implements TimePickerDialog.OnTimeSetListener {
 
     private String firstDate;
+    private String secondDate;
     private boolean reminder;
     private int hourPref;
     private int minPref;
@@ -41,13 +40,21 @@ public class SettingsFragment extends PreferenceFragment implements TimePickerDi
 
         Preference timePref = findPreference("time_pick");
         firstDate = preferences.getString("firstDate", "DEFAULT");
+        secondDate = preferences.getString("secondDate", "DEFAULT");
         hourPref = preferences.getInt("alarmHour", 18);
         minPref = preferences.getInt("alarmMin", 0);
 
 
-        Calendar calendar = setCalendar(firstDate, hourPref, minPref);
+        Calendar calendar = setCalendar(firstDate, hourPref, minPref); // sets calendar to day before bin day
 
-        setSummary(calendar);
+        Calendar current = Calendar.getInstance();
+
+        if (calendar.before(current)) {
+            calendar = setCalendar(secondDate, hourPref, minPref);
+        }
+            setSummary(calendar);
+
+
 
         timePref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
@@ -83,6 +90,7 @@ public class SettingsFragment extends PreferenceFragment implements TimePickerDi
 
 
         firstDate = preferences.getString("firstDate", "DEFAULT");
+        secondDate = preferences.getString("secondDate", "DEFAULT");
         reminder = preferences.getBoolean("pref_reminder", true);
 
         Intent myIntent = new Intent(getActivity(), MyReceiver.class);
@@ -90,9 +98,18 @@ public class SettingsFragment extends PreferenceFragment implements TimePickerDi
 
         alarmMgr = (AlarmManager) getActivity().getSystemService(Context.ALARM_SERVICE);
 
+        Calendar calendar = setCalendar(firstDate, hourOfDay, minute);
+
+        Calendar current = Calendar.getInstance();
+
 
         if ((firstDate != "DEFAULT") && (reminder == true)) {
-            setAlarm(firstDate, hourOfDay, minute);
+
+            if (calendar.before(current)) {
+                setAlarm(secondDate, hourOfDay, minute);
+            } else {
+                setAlarm(firstDate, hourOfDay, minute);
+            }
             Log.v("ALARM", "SET");
 
         } else {
@@ -107,7 +124,7 @@ public class SettingsFragment extends PreferenceFragment implements TimePickerDi
 
     private void setAlarm(String date, int alarmHour, int alarmMin) {
 
-        Calendar calendar = setCalendar(date, alarmHour, alarmMin);
+        Calendar calendar = setCalendar(date, alarmHour, alarmMin); // set calendar to day before bin day
 
         alarmMgr.set(AlarmManager.RTC, calendar.getTimeInMillis(), pendingIntent);
 

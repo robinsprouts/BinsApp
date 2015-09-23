@@ -2,7 +2,6 @@ package com.example.sprouts.binapp;
 
 import android.app.*;
 import android.content.*;
-import android.net.*;
 import android.os.*;
 import android.preference.*;
 import android.support.design.widget.*;
@@ -11,8 +10,7 @@ import android.text.*;
 import android.util.Log;
 import android.view.*;
 import android.widget.*;
-import com.jaunt.*;
-import java.io.*;
+
 import java.text.*;
 import java.util.*;
 
@@ -28,15 +26,8 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String DEBUG_TAG = "Bins";
     private TextView postText;
-    private TextView firedText;
     private String fullAddress;
-    private String firstDate;
-    private String lastFired;
-    private boolean reminder;
-    private int alarmHour;
-    private int alarmMin;
 
-    private UpdateReceiver updateReceiver;
 
 
     private AlarmManager alarmMgr;
@@ -61,61 +52,14 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private class UpdateReceiver extends BroadcastReceiver {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-             final CoordinatorLayout coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatorView);
-
-            if (intent.getAction().equals("FINISHED")) {
-
-                Bundle extras = intent.getExtras();
-
-                String error = extras.getString("error");
-
-                Snackbar.make(coordinatorLayout, error, Snackbar.LENGTH_SHORT).show();
-
-                SharedPreferences prefs;
-
-                prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                String binString = prefs.getString("bins", "DEFAULT");
-
-                if (binString.contains(";")) {
-
-                    updateBinList(binString);
-                    // Toast.makeText(MainActivity.this, "UPDATING", Toast.LENGTH_LONG).show(); // keep this but as SnackBar
-                }
-
-            }
-
-        }
-    }
 
     @Override
     public void onResume() {
         super.onResume();
 
-        updateReceiver = new UpdateReceiver();
-
-        IntentFilter intentFilter = new IntentFilter("FINISHED");
-
-        registerReceiver(updateReceiver, intentFilter);
-
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         fullAddress = prefs.getString("address", "DEFAULT");
-
-        firstDate = prefs.getString("firstDate", "DEFAULT");
-
-        reminder = prefs.getBoolean("pref_reminder", true);
-
-        alarmHour = prefs.getInt("alarmHour", 18);
-
-        alarmMin = prefs.getInt("alarmMin", 0);
-
-        lastFired = prefs.getString("last_fired", "blank");
-
 
         if (fullAddress.contains(",")) {
 
@@ -124,7 +68,6 @@ public class MainActivity extends AppCompatActivity {
             postText.setText(shortAddress);
 
             launchIntent();
-            setBgdTask();
 
         } else {
 
@@ -132,18 +75,12 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
-        prefs = PreferenceManager.getDefaultSharedPreferences(this);
         String binString = prefs.getString("bins", "DEFAULT");
 
         if (binString.contains(";")) {
 
             updateBinList(binString);
-
-        } else {
-            launchInput();
-
         }
-
     }
 
     private void updateBinList(String binString) {
@@ -166,42 +103,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void setBgdTask() {
 
-        // do i need to do this in other activity?
-
-        long interval = AlarmManager.INTERVAL_FIFTEEN_MINUTES;
-
-        Log.v("MainActivity", "setBgdTask");
-
-        Intent myIntent = new Intent(MainActivity.this, BgdReceiver.class);
-
-        pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0, myIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-
-        alarmMgr = (AlarmManager) getSystemService(ALARM_SERVICE);
-
-        alarmMgr.setRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + interval, interval, pendingIntent);
-
-    }
-
-
-    private String convertDate(String binDate) {
-
-        int length = binDate.length();
-        String stringDate = binDate.substring(length - 10, length);
-
-        SimpleDateFormat inputFormat = new SimpleDateFormat("dd/MM/yy");
-        SimpleDateFormat outputFormat = new SimpleDateFormat("EEEE d MMMM yyyy");
-
-        try {
-            Date date = inputFormat.parse(stringDate);
-            stringDate = outputFormat.format(date);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-
-        return stringDate;
-    }
 
     private String shortenAddress(String address) {
         String shortAddress = address.substring(0, address.indexOf(","));
@@ -219,13 +121,6 @@ public class MainActivity extends AppCompatActivity {
         return shortAddress;
     }
 
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-        unregisterReceiver(updateReceiver);
-    }
 
 
     @Override

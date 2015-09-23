@@ -7,15 +7,17 @@ import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 
+import android.text.Html;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ListView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 
 public class AddressDialogFragment extends DialogFragment {
-
-    private ListView list;
-    private String addressOutput;
 
     ArrayList<String> arrayList = new ArrayList();
 
@@ -28,8 +30,7 @@ public class AddressDialogFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 
         Bundle bundle = getArguments();
-        arrayList = bundle.getStringArrayList("list");
-
+        arrayList = (bundle.getStringArrayList("list"));
         String numString = arrayList.get(0);
         String[] numStrings = numString.split(" ");
 
@@ -37,7 +38,24 @@ public class AddressDialogFragment extends DialogFragment {
 
         arrayList.remove(0);
 
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter(getActivity(), android.R.layout.simple_list_item_1, arrayList);
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, arrayList) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+
+                View view;
+                TextView text;
+
+                LayoutInflater mInflater = LayoutInflater.from(getActivity());
+
+                view = mInflater.inflate(android.R.layout.simple_list_item_1, parent, false);
+
+                text = (TextView) view;
+
+                text.setText(Html.fromHtml(getItem(position)));
+
+                return view;
+            }
+        };
 
 
         String title;

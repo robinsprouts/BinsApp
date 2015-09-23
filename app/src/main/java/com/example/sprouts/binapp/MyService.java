@@ -78,8 +78,7 @@ public class MyService extends Service {
 
         Notification.BigTextStyle big = new Notification.BigTextStyle();
 
-        big.setSummaryText("summary")
-                .setBigContentTitle("Bin day tomorrow")
+        big.setBigContentTitle("Bin day tomorrow")
                 .bigText(bin);
 
         Notification.Builder builder = new Notification.Builder(this);
@@ -91,7 +90,11 @@ public class MyService extends Service {
                 .setContentText(bin)
                 .setShowWhen(true)
                 .setContentIntent(launchIntent)
-                .setVibrate(new long[]{500, 500});
+                .setVibrate(new long[]{500, 500})
+                // .addAction(R.drawable.ic_alarm_black_24dp, "Snooze", snooze)
+        ;
+
+        // TODO: Add cancel and remove buttons - snooze adds an hour and cancel sets alarm for following week...
 
         NotificationManager mNot = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 

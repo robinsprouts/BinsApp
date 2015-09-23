@@ -90,7 +90,7 @@ public class AddressFragment extends Fragment implements AddressDialogFragment.O
 
     @Override
     public void onComplete(String a) {
-        address.setText(a);
+        address.setText(Html.fromHtml(a));
 
     }
 
