@@ -52,6 +52,8 @@ public class BgService extends Service {
         fullAddress = prefs.getString("address", "DEFAULT");
         firstDate = prefs.getString("firstDate", "DEFAULT");
 
+
+
         Log.v("BGSERVICE", firstDate);
 
         /*
@@ -224,6 +226,7 @@ public class BgService extends Service {
 
                                 if (row == 1) {
                                     firstDate = binText;
+                                    firstDate = "Sunday 27 September 2015";
                                 }
 
                                 if (row == 2) {

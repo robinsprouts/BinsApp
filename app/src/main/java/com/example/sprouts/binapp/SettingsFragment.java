@@ -13,10 +13,8 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.TimePicker;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 
 public class SettingsFragment extends PreferenceFragment implements TimePickerDialog.OnTimeSetListener {
 
@@ -45,16 +43,14 @@ public class SettingsFragment extends PreferenceFragment implements TimePickerDi
         minPref = preferences.getInt("alarmMin", 0);
 
 
-        Calendar calendar = setCalendar(firstDate, hourPref, minPref); // sets calendar to day before bin day
+        Calendar calendar = AlarmSet.setCalendar(firstDate, hourPref, minPref); // sets calendar to day before bin day
 
         Calendar current = Calendar.getInstance();
 
         if (calendar.before(current)) {
-            calendar = setCalendar(secondDate, hourPref, minPref);
+            calendar = AlarmSet.setCalendar(secondDate, hourPref, minPref);
         }
             setSummary(calendar);
-
-
 
         timePref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
@@ -98,37 +94,29 @@ public class SettingsFragment extends PreferenceFragment implements TimePickerDi
 
         alarmMgr = (AlarmManager) getActivity().getSystemService(Context.ALARM_SERVICE);
 
-        Calendar calendar = setCalendar(firstDate, hourOfDay, minute);
+        Calendar calendar = AlarmSet.setCalendar(firstDate, hourOfDay, minute);
 
         Calendar current = Calendar.getInstance();
 
 
-        if ((firstDate != "DEFAULT") && (reminder == true)) {
+        if ((firstDate != "DEFAULT") && (reminder)) {
 
             if (calendar.before(current)) {
-                setAlarm(secondDate, hourOfDay, minute);
+                calendar = AlarmSet.setCalendar(secondDate, hourOfDay, minute); // set calendar to day before bin day
             } else {
-                setAlarm(firstDate, hourOfDay, minute);
+                calendar = AlarmSet.setCalendar(firstDate, hourOfDay, minute);
             }
+            setAlarm(calendar);
+            setSummary(calendar);
             Log.v("ALARM", "SET");
 
         } else {
-            alarmMgr.cancel(pendingIntent);
+            alarmMgr.cancel(pendingIntent); // separate out reminder bit
 
             Log.v("ALARM", "NOT SET");
         }
 
 
-    }
-
-
-    private void setAlarm(String date, int alarmHour, int alarmMin) {
-
-        Calendar calendar = setCalendar(date, alarmHour, alarmMin); // set calendar to day before bin day
-
-        alarmMgr.set(AlarmManager.RTC, calendar.getTimeInMillis(), pendingIntent);
-
-        setSummary(calendar);
     }
 
     private void setSummary(Calendar calendar) {
@@ -142,26 +130,11 @@ public class SettingsFragment extends PreferenceFragment implements TimePickerDi
         timePref.setSummary(alarmTime);
     }
 
-    private Calendar setCalendar(String date, int alarmHour, int alarmMin) {
-        Calendar calendar = Calendar.getInstance();
+    private void setAlarm(Calendar calendar) {
 
-        SimpleDateFormat inputFormat = new SimpleDateFormat("EEEE d MMMM yyyy");
+        alarmMgr.set(AlarmManager.RTC, calendar.getTimeInMillis(), pendingIntent);
 
-        Date alarmDate = null;
-
-        try {
-            alarmDate = inputFormat.parse(date);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-
-        calendar.setTime(alarmDate);
-        calendar.set(Calendar.HOUR_OF_DAY, alarmHour);
-        calendar.set(Calendar.MINUTE, alarmMin);
-        calendar.set(Calendar.SECOND, 0);
-        calendar.add(Calendar.DAY_OF_MONTH, -1); // Set for the day before bin day
-
-        return calendar;
     }
+
 
 }

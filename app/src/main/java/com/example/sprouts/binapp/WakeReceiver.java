@@ -29,8 +29,6 @@ public class WakeReceiver extends BroadcastReceiver {
             restartBgService(context);
             restartAlarm(context);
 
-            Log.v("WakeReceiver", "restart alarms");
-
         }
 
     }
@@ -40,7 +38,7 @@ public class WakeReceiver extends BroadcastReceiver {
 
         long interval = AlarmManager.INTERVAL_HALF_DAY;
 
-        Log.v("MainActivity", "setBgdTask");
+        Log.v("WakeReceiver", "Restart Background Service");
 
         Intent myIntent = new Intent(context, BgdReceiver.class);
 
@@ -56,26 +54,43 @@ public class WakeReceiver extends BroadcastReceiver {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         boolean reminder = preferences.getBoolean("pref_reminder", true);
         String firstDate = preferences.getString("firstDate", "DEFAULT");
+        String secondDate = preferences.getString("secondDate", "DEFAULT");
         int hour = preferences.getInt("alarmHour", 18);
         int minute = preferences.getInt("alarmMin", 0);
 
-        if ((firstDate != "DEFAULT") && (reminder == true)) {
-            setAlarm(context, firstDate, hour, minute);
-            Log.v("ALARM", "SET");
+
+        Calendar calendar = setCalendar(firstDate, hour, minute);
+
+        Calendar current = Calendar.getInstance();
+
+
+        if ((firstDate != "DEFAULT") && (reminder)) {
+
+            if (calendar.before(current)) {
+                calendar = setCalendar(secondDate, hour, minute); // set calendar to day before bin day
+                Log.v("WakeReceiver", "before " + secondDate + " " + hour + " " + minute);
+
+            } else {Log.v("WakeReceiver", "restart alarms");
+
+                calendar = setCalendar(firstDate, hour, minute);
+                Log.v("WakeReceiver", "after " + firstDate + " " + hour + " " + minute);
+
+            }
+            setAlarm(context, calendar);
+            Log.v("WakeReceiver", "restart alarms");
+
         }
 
     }
 
-    private void setAlarm(Context context, String date, int alarmHour, int alarmMin) {
-
-
-        Calendar calendar = setCalendar(date, alarmHour, alarmMin);
+    private void setAlarm(Context context, Calendar calendar) {
 
         Intent myIntent = new Intent(context, MyReceiver.class);
 
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, myIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
         AlarmManager alarmMgr = (AlarmManager) context.getSystemService(context.ALARM_SERVICE);
+
         alarmMgr.set(AlarmManager.RTC, calendar.getTimeInMillis(), pendingIntent);
 
     }

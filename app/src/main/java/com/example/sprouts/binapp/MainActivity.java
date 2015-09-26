@@ -27,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String DEBUG_TAG = "Bins";
     private TextView postText;
     private String fullAddress;
+    private String binString;
 
 
 
@@ -60,14 +61,16 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         fullAddress = prefs.getString("address", "DEFAULT");
+        binString = prefs.getString("bins", "DEFAULT");
 
-        if (fullAddress.contains(",")) {
+        if (fullAddress.contains(",") && binString.contains(";")) {
 
             String shortAddress = shortenAddress(fullAddress);
 
             postText.setText(shortAddress);
 
             launchIntent();
+            updateBinList(binString);
 
         } else {
 
@@ -75,12 +78,6 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
-        String binString = prefs.getString("bins", "DEFAULT");
-
-        if (binString.contains(";")) {
-
-            updateBinList(binString);
-        }
     }
 
     private void updateBinList(String binString) {
