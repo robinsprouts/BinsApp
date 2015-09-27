@@ -14,8 +14,6 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 
@@ -27,7 +25,6 @@ public class AddressActivity extends AppCompatActivity implements AddressDialogF
     private EditText address;
     private UpdateReceiver updateReceiver;
     private PendingIntent pendingIntent;
-    private AlarmManager alarmMgr;
     private boolean complete;
 
     private String firstDate;
@@ -107,7 +104,7 @@ public class AddressActivity extends AppCompatActivity implements AddressDialogF
 
         pendingIntent = PendingIntent.getBroadcast(AddressActivity.this, 0, myIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
-        alarmMgr = (AlarmManager) getSystemService(ALARM_SERVICE);
+        AlarmManager alarmMgr = (AlarmManager) getSystemService(ALARM_SERVICE);
 
         // launches the background bin update service
         alarmMgr.setRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + interval, interval, pendingIntent);
@@ -178,28 +175,6 @@ public class AddressActivity extends AppCompatActivity implements AddressDialogF
 
         Log.v("AddressActivity", "alarm set " + firstDate + " " + hourPref + " " + minPref);
 
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_address, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
 }

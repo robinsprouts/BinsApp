@@ -21,14 +21,7 @@ I also need to convert the dates into proper dates so that I can make the alarm 
 public class MainActivity extends AppCompatActivity {
 
     private TextView postText;
-    private String fullAddress;
-    private String binString;
 
-
-
-    private AlarmManager alarmMgr;
-
-    private PendingIntent pendingIntent;
 
     ArrayAdapter<String> arrayAdapter;
 
@@ -37,12 +30,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         postText = (TextView) findViewById(R.id.textView);
-
-        Intent myIntent = new Intent(MainActivity.this, MyReceiver.class);
-
-        pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0, myIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-
-        alarmMgr = (AlarmManager) getSystemService(ALARM_SERVICE);
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
@@ -55,8 +42,8 @@ public class MainActivity extends AppCompatActivity {
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-        fullAddress = prefs.getString("address", "DEFAULT");
-        binString = prefs.getString("bins", "DEFAULT");
+        String fullAddress = prefs.getString("address", "DEFAULT");
+        String binString = prefs.getString("bins", "DEFAULT");
 
         if (fullAddress.contains(",") && binString.contains(";")) {
 

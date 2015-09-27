@@ -5,6 +5,7 @@ import android.os.*;
 import android.support.design.widget.TextInputLayout;
 import android.text.*;
 import android.view.*;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
 import com.jaunt.*;
 import java.io.*;
@@ -41,6 +42,7 @@ public class AddressFragment extends Fragment implements AddressDialogFragment.O
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                hideSoftKeyboard(getActivity());
                 lookup();
             }
         });
@@ -70,6 +72,11 @@ public class AddressFragment extends Fragment implements AddressDialogFragment.O
     }
 
     /** main methods **/
+
+    public void hideSoftKeyboard(Activity activity) {
+        InputMethodManager inputMethodManager = (InputMethodManager)  activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        inputMethodManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
+    }
 
 
     public void lookup() {
