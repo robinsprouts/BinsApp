@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.SystemClock;
-import android.preference.Preference;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -89,7 +88,7 @@ public class WakeReceiver extends BroadcastReceiver {
 
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, myIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
-        AlarmManager alarmMgr = (AlarmManager) context.getSystemService(context.ALARM_SERVICE);
+        AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
         alarmMgr.set(AlarmManager.RTC, calendar.getTimeInMillis(), pendingIntent);
 

@@ -22,16 +22,6 @@ public class InfoActivityFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_info, container, false);
 
-        TextView log;
-
-        log = (TextView) view.findViewById(R.id.logText);
-
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-
-        String logText = preferences.getString("logText", "Log Empty");
-
-        log.setText(logText);
-
         return view;
     }
 

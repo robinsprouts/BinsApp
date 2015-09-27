@@ -20,15 +20,6 @@ public class AddressFragment extends Fragment implements AddressDialogFragment.O
 
     private Button button;
 
-    public static AddressFragment newInstance(String param1, String param2) {
-
-        AddressFragment fragment = new AddressFragment();
-        Bundle args = new Bundle();
-
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     public AddressFragment() {
         // Required empty public constructor
     }

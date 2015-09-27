@@ -4,17 +4,13 @@ import android.app.*;
 import android.content.*;
 import android.os.*;
 import android.preference.*;
-import android.support.design.widget.*;
 import android.support.v7.app.*;
 import android.text.*;
 import android.util.Log;
 import android.view.*;
 import android.widget.*;
 
-import java.text.*;
 import java.util.*;
-
-import java.text.ParseException;
 
 /* TO DO: I need to update the binList each time the address is refreshed (in AddressActivity) *and* in the MainActivity when the app first opens, and at regular intervals using an alarm
 
@@ -24,7 +20,6 @@ I also need to convert the dates into proper dates so that I can make the alarm 
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String DEBUG_TAG = "Bins";
     private TextView postText;
     private String fullAddress;
     private String binString;

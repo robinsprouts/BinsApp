@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.IBinder;
-import android.preference.Preference;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -226,7 +225,6 @@ public class BgService extends Service {
 
                                 if (row == 1) {
                                     firstDate = binText;
-                                    firstDate = "Sunday 27 September 2015";
                                 }
 
                                 if (row == 2) {

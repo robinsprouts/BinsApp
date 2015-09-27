@@ -7,11 +7,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.os.Handler;
 import android.os.SystemClock;
-import android.preference.Preference;
 import android.preference.PreferenceManager;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 
 import android.support.v7.app.AppCompatActivity;
@@ -26,6 +23,7 @@ import java.util.Calendar;
 
 public class AddressActivity extends AppCompatActivity implements AddressDialogFragment.OnCompleteListener  {
 
+    private SharedPreferences preferences;
     private EditText address;
     private UpdateReceiver updateReceiver;
     private PendingIntent pendingIntent;
@@ -47,7 +45,7 @@ public class AddressActivity extends AppCompatActivity implements AddressDialogF
         address = (EditText) findViewById(R.id.address1);
 
 
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        preferences = PreferenceManager.getDefaultSharedPreferences(AddressActivity.this);
         firstDate = preferences.getString("firstDate", "DEFAULT");
         secondDate = preferences.getString("secondDate", "DEFAULT");
         hourPref = preferences.getInt("alarmHour", 18);
@@ -119,6 +117,8 @@ public class AddressActivity extends AppCompatActivity implements AddressDialogF
 
     private class UpdateReceiver extends BroadcastReceiver {
 
+        // SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(AddressActivity.this);
+
         @Override
         public void onReceive(Context context, Intent intent) {
 
@@ -130,6 +130,12 @@ public class AddressActivity extends AppCompatActivity implements AddressDialogF
 
                 Log.v("AddressActivity", error);
 
+                firstDate = preferences.getString("firstDate", "DEFAULT");
+                secondDate = preferences.getString("secondDate", "DEFAULT");
+                hourPref = preferences.getInt("alarmHour", 18);
+                minPref = preferences.getInt("alarmMin", 0);
+                reminder = preferences.getBoolean("pref_reminder", true);
+
 
                 if (complete) {
 
@@ -138,7 +144,9 @@ public class AddressActivity extends AppCompatActivity implements AddressDialogF
                     Calendar calendar = AlarmSet.setCalendar(firstDate, hourPref, minPref);
                     Calendar current = Calendar.getInstance();
 
-                    if ((firstDate != "DEFAULT") && (reminder)) {
+                    if ((!firstDate.equals("DEFAULT")) && (reminder)) {
+
+                        Log.v("AddressActivity", "Alarm set for first date: " + firstDate);
 
                         if (calendar.before(current)) {
                             calendar = AlarmSet.setCalendar(secondDate, hourPref, minPref); // set calendar to day before bin day

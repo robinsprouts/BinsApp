@@ -19,8 +19,7 @@
             android:id="@+id/instructions"
             android:text="Please enter the first line of your address, or your postcode, and choose from the list."
             android:textSize="@dimen/abc_text_size_large_material"
-            android:layout_marginTop="@dimen/abc_text_size_small_material"
-            android:layout_marginBottom="@dimen/abc_text_size_large_material" />
+            android:layout_marginBottom="@dimen/abc_text_size_small_material" />
 
     <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
