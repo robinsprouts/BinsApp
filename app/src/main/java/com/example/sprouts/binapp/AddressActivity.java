@@ -17,6 +17,9 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
+
 import java.util.Calendar;
 
 public class AddressActivity extends AppCompatActivity implements AddressDialogFragment.OnCompleteListener  {
@@ -32,6 +35,7 @@ public class AddressActivity extends AppCompatActivity implements AddressDialogF
     int hourPref;
     int minPref;
     boolean reminder;
+    private Tracker mTracker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +53,10 @@ public class AddressActivity extends AppCompatActivity implements AddressDialogF
         minPref = preferences.getInt("alarmMin", 0);
         reminder = preferences.getBoolean("pref_reminder", true);
 
+        // Obtain the shared Tracker instance.
+        AnalyticApp application = (AnalyticApp) getApplication();
+        mTracker = application.getDefaultTracker();
+
     }
 
     @Override
@@ -59,6 +67,11 @@ public class AddressActivity extends AppCompatActivity implements AddressDialogF
         IntentFilter intentFilter = new IntentFilter("FINISHED"); // somehow make this what delays return to first activity
 
         registerReceiver(updateReceiver, intentFilter);
+
+        String name = "Address";
+        Log.i("AddressActivity", "Setting screen name: " + name);
+        mTracker.setScreenName("Screen = " + name);
+        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
 
     }
 
