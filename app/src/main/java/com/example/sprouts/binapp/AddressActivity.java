@@ -54,8 +54,10 @@ public class AddressActivity extends AppCompatActivity implements AddressDialogF
         reminder = preferences.getBoolean("pref_reminder", true);
 
         // Obtain the shared Tracker instance.
+
         AnalyticApp application = (AnalyticApp) getApplication();
         mTracker = application.getDefaultTracker();
+
 
     }
 
@@ -67,6 +69,7 @@ public class AddressActivity extends AppCompatActivity implements AddressDialogF
         IntentFilter intentFilter = new IntentFilter("FINISHED"); // somehow make this what delays return to first activity
 
         registerReceiver(updateReceiver, intentFilter);
+
 
         String name = "Address";
         Log.i("AddressActivity", "Setting screen name: " + name);
@@ -103,9 +106,7 @@ public class AddressActivity extends AppCompatActivity implements AddressDialogF
 
     private void setBgdTask() {
 
-        long interval = AlarmManager.INTERVAL_HALF_DAY/2;
-
-        // interval = 1000;
+        long interval = AlarmManager.INTERVAL_DAY;
 
         Log.v("MainActivity", "setBgdTask");
 
@@ -113,7 +114,7 @@ public class AddressActivity extends AppCompatActivity implements AddressDialogF
 
         this.startService(updateIntent); // gets the bin data for the first time
 
-        Intent myIntent = new Intent(AddressActivity.this, BgdReceiver.class);
+        Intent myIntent = new Intent(AddressActivity.this, BgReceiver.class);
 
         pendingIntent = PendingIntent.getBroadcast(AddressActivity.this, 0, myIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
@@ -140,6 +141,7 @@ public class AddressActivity extends AppCompatActivity implements AddressDialogF
 
                 Log.v("AddressActivity", error);
 
+                /*
                 firstDate = preferences.getString("firstDate", "DEFAULT");
                 secondDate = preferences.getString("secondDate", "DEFAULT");
                 hourPref = preferences.getInt("alarmHour", 18);
@@ -167,18 +169,17 @@ public class AddressActivity extends AppCompatActivity implements AddressDialogF
 
                     setAlarm(calendar); // sets the alarm
 
-
+*/
                     finish();
                 }
 
             }
 
         }
-    }
 
     private void setAlarm(Calendar calendar) {
 
-        Intent myIntent = new Intent(AddressActivity.this, MyReceiver.class);
+        Intent myIntent = new Intent(AddressActivity.this, AlarmReceiver.class);
 
         pendingIntent = PendingIntent.getBroadcast(AddressActivity.this, 0, myIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 

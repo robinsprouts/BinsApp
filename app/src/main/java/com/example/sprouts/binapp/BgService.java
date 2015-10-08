@@ -1,5 +1,7 @@
 package com.example.sprouts.binapp;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -30,10 +32,16 @@ public class BgService extends Service {
     private String fullAddress;
     private String firstDate;
     private String secondDate;
+    private int hourPref;
+    private int minPref;
+    private boolean reminder;
     private String errorText = "Updated";
+    private PendingIntent pendingIntent;
 
     @Override
-    public IBinder onBind(Intent intent) {return null;}
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
 
     @Override
     public void onCreate() {
@@ -50,7 +58,6 @@ public class BgService extends Service {
 
         fullAddress = prefs.getString("address", "DEFAULT");
         firstDate = prefs.getString("firstDate", "DEFAULT");
-
 
 
         Log.v("BGSERVICE", firstDate);
@@ -117,7 +124,7 @@ public class BgService extends Service {
     public void check() {
 
         String stringUrl = "https://wastemanagementcalendar.cardiff.gov.uk/English.aspx";
-            new DownloadWebpageTask().execute(stringUrl);
+        new DownloadWebpageTask().execute(stringUrl);
     }
 
     private class DownloadWebpageTask extends AsyncTask<String, Void, ArrayList> {
@@ -140,8 +147,9 @@ public class BgService extends Service {
         @Override
         protected void onPostExecute(ArrayList arrayList) {
 
-                putList(arrayList);
-                broadcast();
+            putList(arrayList);
+            getAlarm();
+            broadcast();
         }
 
     }
@@ -164,8 +172,7 @@ public class BgService extends Service {
 
         if (errorText.equals("Updated")) {
             logText = logText + "\n" + "Update successful " + timeStamp;
-        }
-        else {
+        } else {
             logText = logText + "\n" + errorText + " " + timeStamp;
         }
 
@@ -257,17 +264,16 @@ public class BgService extends Service {
             return binArray;
 
         } catch (ResponseException e) {
-                System.err.println(e);
+            System.err.println(e);
 
-                HttpResponse response = e.getResponse();
-                if (response != null) {
-                    errorText = "HTTP Error";
-                }
-                else {
-                    errorText = "Connection Error";
-                }
+            HttpResponse response = e.getResponse();
+            if (response != null) {
+                errorText = "HTTP Error";
+            } else {
+                errorText = "Connection Error";
+            }
             binArray.add(0, errorText);
-                return binArray;
+            return binArray;
 
         } catch (JauntException e) {
             System.err.println(e);
@@ -295,4 +301,48 @@ public class BgService extends Service {
 
         return stringDate;
     }
+
+    private void getAlarm() {
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(BgService.this);
+
+        hourPref = preferences.getInt("alarmHour", 18);
+        minPref = preferences.getInt("alarmMin", 0);
+        reminder = preferences.getBoolean("pref_reminder", true);
+
+
+        Log.v("BgService", "updated");
+
+        Calendar calendar = AlarmSet.setCalendar(firstDate, hourPref, minPref);
+        Calendar current = Calendar.getInstance();
+
+        if ((!firstDate.equals("DEFAULT")) && (reminder)) {
+
+            Log.v("BgService", "Alarm set for first date: " + firstDate);
+
+            if (calendar.before(current)) {
+                calendar = AlarmSet.setCalendar(secondDate, hourPref, minPref); // set calendar to day before bin day
+            } else {
+                calendar = AlarmSet.setCalendar(firstDate, hourPref, minPref);
+            }
+        }
+
+        setAlarm(calendar); // sets the alarm
+
+    }
+
+    private void setAlarm(Calendar calendar) {
+
+        Intent myIntent = new Intent(BgService.this, AlarmReceiver.class);
+
+        pendingIntent = PendingIntent.getBroadcast(BgService.this, 0, myIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+        AlarmManager alarmMgr = (AlarmManager) getSystemService(ALARM_SERVICE);
+
+        alarmMgr.set(AlarmManager.RTC, calendar.getTimeInMillis(), pendingIntent);
+
+        Log.v("BgService", "alarm set " + firstDate + " " + hourPref + " " + minPref);
+
+    }
+
 }

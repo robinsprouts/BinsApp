@@ -6,18 +6,22 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 
-public class MyService extends Service {
+import java.net.URI;
+
+public class AlarmService extends Service {
 
     private NotificationManager mManager;
     private String bin;
     private int col;
 
-    public MyService() {
+    public AlarmService() {
     }
 
     @Override
@@ -67,12 +71,21 @@ public class MyService extends Service {
         // TODO Auto-generated method stub
         super.onDestroy();
 
-        Log.v("MyService", "onDestroy");
+        Log.v("AlarmService", "onDestroy");
     }
 
     public void showNotification(int col) {
 
         PendingIntent launchIntent = PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), 0);
+
+        Intent snoozeIntent = new Intent(this, SnoozeReceiver.class);
+        snoozeIntent.setAction("SNOOZE_ACTION");
+        PendingIntent snoozePendingIntent = PendingIntent.getBroadcast(this, 0, snoozeIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        Intent dismissIntent = new Intent(this, SnoozeReceiver.class);
+        dismissIntent.setAction("DISMISS_ACTION");
+        PendingIntent dismissPendingIntent = PendingIntent.getBroadcast(this, 0, dismissIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
 
         int mNotificationId = 002;
 
@@ -83,6 +96,8 @@ public class MyService extends Service {
 
         Notification.Builder builder = new Notification.Builder(this);
 
+        Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+
         builder.setStyle(big)
                 .setSmallIcon(R.drawable.ic_stat_bin_notification)
                 .setColor(col)
@@ -90,7 +105,11 @@ public class MyService extends Service {
                 .setContentText(bin)
                 .setShowWhen(true)
                 .setContentIntent(launchIntent)
-                .setVibrate(new long[]{500, 500})
+                .setSound(alarmSound)
+                .addAction(R.drawable.ic_alarm_black_24dp, "Snooze", snoozePendingIntent)
+                .addAction(R.drawable.ic_close_black_24dp, "Dismiss", dismissPendingIntent);
+                ;
+                // .setVibrate(new long[]{500, 500})
                 // .addAction(R.drawable.ic_alarm_black_24dp, "Snooze", snooze)
         ;
 

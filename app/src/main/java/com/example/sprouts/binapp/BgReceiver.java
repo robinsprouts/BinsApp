@@ -5,8 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-public class BgdReceiver extends BroadcastReceiver {
-    public BgdReceiver() {
+public class BgReceiver extends BroadcastReceiver {
+    public BgReceiver() {
     }
 
     @Override
@@ -14,7 +14,7 @@ public class BgdReceiver extends BroadcastReceiver {
 
         Intent updateIntent = new Intent(context, BgService.class);
 
-        Log.v("BgdReceiver", "onReceive");
+        Log.v("BgReceiver", "onReceive");
 
         context.startService(updateIntent);
     }

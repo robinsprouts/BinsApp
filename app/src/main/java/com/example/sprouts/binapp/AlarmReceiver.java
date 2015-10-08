@@ -5,8 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-public class MyReceiver extends BroadcastReceiver {
-    public MyReceiver() {
+public class AlarmReceiver extends BroadcastReceiver {
+    public AlarmReceiver() {
     }
 
     @Override
@@ -14,7 +14,7 @@ public class MyReceiver extends BroadcastReceiver {
 
         Log.v("My Receiver", "Ready");
 
-        Intent robinIntent = new Intent(context, MyService.class);
+        Intent robinIntent = new Intent(context, AlarmService.class);
 
         context.startService(robinIntent);
 

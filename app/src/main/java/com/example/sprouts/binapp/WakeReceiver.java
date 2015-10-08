@@ -39,7 +39,7 @@ public class WakeReceiver extends BroadcastReceiver {
 
         Log.v("WakeReceiver", "Restart Background Service");
 
-        Intent myIntent = new Intent(context, BgdReceiver.class);
+        Intent myIntent = new Intent(context, BgReceiver.class);
 
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, myIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
@@ -84,7 +84,7 @@ public class WakeReceiver extends BroadcastReceiver {
 
     private void setAlarm(Context context, Calendar calendar) {
 
-        Intent myIntent = new Intent(context, MyReceiver.class);
+        Intent myIntent = new Intent(context, AlarmReceiver.class);
 
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, myIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 

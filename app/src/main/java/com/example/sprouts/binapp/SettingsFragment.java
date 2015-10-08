@@ -89,7 +89,7 @@ public class SettingsFragment extends PreferenceFragment implements TimePickerDi
         secondDate = preferences.getString("secondDate", "DEFAULT");
         reminder = preferences.getBoolean("pref_reminder", true);
 
-        Intent myIntent = new Intent(getActivity(), MyReceiver.class);
+        Intent myIntent = new Intent(getActivity(), AlarmReceiver.class);
         pendingIntent = PendingIntent.getBroadcast(getActivity(), 0, myIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
         alarmMgr = (AlarmManager) getActivity().getSystemService(Context.ALARM_SERVICE);
